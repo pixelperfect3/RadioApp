@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Calendar;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -16,11 +17,19 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.text.format.DateFormat;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class RadioApp extends Activity {
 	// TODO:
@@ -29,8 +38,12 @@ public class RadioApp extends Activity {
 	
 	// The TextView
 	TextView t;
+	
 	// The Button
 	Button button;
+	
+	// Time
+	Time now;
 	
 /** Called when the activity is first created. */
 
@@ -42,8 +55,27 @@ public class RadioApp extends Activity {
 		// get the text view
 		t=(TextView)findViewById(R.id.text); 
 		
+		// time object
+		now = new Time();
+		
+		// Check if internet connection is available
+		boolean net = this.isNetworkAvailable();
+		if (!net) {
+			//showToast("No internet connection!");
+			
+			// Create an alert dialog
+			showDialog("No Internet Connection! Enable WiFi or 3G");
+			return;
+		}
+		
 		// Try to read the JSON information and then update the TextView
-		updateCurrentSong(_selectedChannelName);
+		boolean update = updateCurrentSong(_selectedChannelName);
+		
+		// if can't update, make toast saying there was an error with reading
+		if (!update) {
+			CharSequence text = "Error reading information";
+			showToast(text);
+		}
 		
 		// Add the listener to the button
 		// The button will refresh the current song being played
@@ -59,7 +91,24 @@ public class RadioApp extends Activity {
 
 	// Updates the current song via button click
 	public void refresh(View view) {
-		updateCurrentSong(_selectedChannelName);
+		// Check if internet connection is available
+		boolean net = this.isNetworkAvailable();
+		if (!net) {
+			//showToast("No internet connection!");
+			
+			// Create an alert dialog
+			showDialog("No Internet Connection! Enable WiFi or 3G");
+			return;
+		}
+		
+		// Try to read the JSON information and then update the TextView
+		boolean update = updateCurrentSong(_selectedChannelName);
+		
+		// if can't update, make toast saying there was an error with reading
+		if (!update) {
+			CharSequence text = "Error reading information";
+			showToast(text);
+		}
 	}
 	
 	// Updates the current song on the selected channel
@@ -95,8 +144,16 @@ public class RadioApp extends Activity {
 				//Log.i(RadioApp.class.getName(), jsonObject.getString("text"));
 			}
 			
+			// Get the current time
+			//now = new Time();
+			now.setToNow();
+			String delegate = "hh:mm aaa";
+			String time = now.format("%H:%M");
+	        //String time = (String) DateFormat.format(delegate,Calendar.getInstance().getTime());
+			
 			// update the text
-		    t.setText("Name: " + name + "\nArtist: " + artist + "\nSong: " + song);//readJSONFeed);
+		    t.setText("Name: " + name + "\nArtist: " + artist + "\nSong: " + song + "\nTime: " + time);//readJSONFeed);
+		    return true;
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -106,6 +163,7 @@ public class RadioApp extends Activity {
 		return false;
 	}
 	
+	// Reads the JSON about the channel
 	public String readJSON(String channelName) {
 		StringBuilder builder = new StringBuilder();
 		
@@ -141,5 +199,45 @@ public class RadioApp extends Activity {
 			t.setText("Exception " + e.toString());
 		}
 		return builder.toString();
+	}
+
+
+	// Helper method for showing a Toast notification
+	private void showToast(CharSequence text) {
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_LONG;//  Toast.LENGTH_SHORT;
+
+		Toast toast = Toast.makeText(context, text, duration);
+		toast.show();
+	}
+	
+	// Creates an alert dialog
+	private void showDialog(CharSequence text) {
+		// build a dialog
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		// set the message
+		builder.setMessage(text)
+		       .setCancelable(false)
+		       /*.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+		                MyActivity.this.finish();
+		           }
+		       })*/
+		       // set only the negative button
+		       .setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+		                dialog.cancel();
+		           }
+		       });
+		AlertDialog alert = builder.create();
+		alert.show();
+	}
+	
+	// Checks if internet connection is available
+	private boolean isNetworkAvailable() {
+	    ConnectivityManager connectivityManager 
+	          = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+	    NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+	    return activeNetworkInfo != null;
 	}
 }
