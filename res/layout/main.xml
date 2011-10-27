@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
+    	android:orientation="vertical"
+    	android:layout_width="fill_parent"
+    	android:layout_height="fill_parent">
+    <Spinner android:layout_width="fill_parent" 
+    		 android:id="@+id/spinner1" 
+    		 android:layout_height="wrap_content"
+    		 android:layout_margin="20dip"></Spinner>
+    		 
     <TextView android:layout_width="fill_parent" android:id="@+id/text" android:layout_height="wrap_content" 
-    android:text="@string/hello"
-    android:textSize="25dp"
-    android:layout_margin="20dip"></TextView>
-    <Button android:id="@+id/refreshButton" 
-    android:text="@string/refresh" 
-     android:textSize="20dp"
-    android:layout_margin="20dip" android:layout_width="150dip" android:layout_height="100dip"
-    android:onClick="refresh"></Button>
+    		  android:text="@string/hello"
+    		  android:textSize="25dp"
+    		  android:layout_margin="20dip"></TextView>
+    <Button android:layout_margin="20dip" 
+    		android:id="@+id/refreshButton" 
+    		android:textSize="20dp" 
+    		android:text="@string/refresh" 
+    		android:onClick="refresh" 
+    		android:layout_width="150dip" 
+    		android:layout_height="100dip"></Button>
 </LinearLayout>

@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Calendar;
+import java.util.Scanner;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -23,18 +23,23 @@ import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.text.format.DateFormat;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class RadioApp extends Activity {
 	// TODO:
 	// Add a spinner to get a list of all the channels
-	private String _selectedChannelName = "WYKS"; // 105.3 Gainesville
+	private String _selectedChannelName = "WYKS"; // 105.3 Gainesville at first
+	private String _currentArtist = ""; 
+	private String _currentSong = "";
 	
 	// The TextView
 	TextView t;
@@ -55,7 +60,49 @@ public class RadioApp extends Activity {
 		// get the text view
 		t=(TextView)findViewById(R.id.text); 
 		
-		// time object
+		/** Setup the Spinner by populating it with the list of Gainesville radio stations **/
+		
+		String channelJSON = readJSON("gainesville", false);
+		Log.i(RadioApp.class.getName(),"channelJSON: " + channelJSON);
+		
+		try {
+			// create the json object from the string
+			JSONObject jsonobj = new JSONObject(channelJSON);
+			
+			// get the array of stations
+			JSONArray jsonArray = new JSONArray(jsonobj.getString("stations"));
+			
+			// Create the array of strings which will be used for populating the spinner
+			String[] stations = new String[jsonArray.length()];
+			// go through each station
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject jsonObject = jsonArray.getJSONObject(i);
+				// get the station name
+				String name = jsonObject.getString("name");
+				// get the description
+				String desc = jsonObject.getString("desc");
+				
+				// add to the string array
+				stations[i] = name + " " + desc;
+			}
+			
+			// Populate the Spinner
+			Spinner s = (Spinner) findViewById(R.id.spinner1);
+			ArrayAdapter adapter = new ArrayAdapter(this,
+					android.R.layout.simple_spinner_item, stations);
+			s.setAdapter(adapter);
+			// now set the Spinner to listen for changes
+			s.setOnItemSelectedListener(new MyOnItemSelectedListener());
+			
+			
+			//Log.i(RadioApp.class.getName(),"JSON LENGTH: " + jsonArray.length());
+			// get the first object which has all the info
+			//JSONObject firstJson = jsonArray.getJSONObject(1);
+		} catch (Exception e) {
+			Log.i(RadioApp.class.getName(), "JSON Exception: " + e.toString());
+		}
+		
+		// the Time object
 		now = new Time();
 		
 		// Check if internet connection is available
@@ -115,7 +162,7 @@ public class RadioApp extends Activity {
 	private boolean updateCurrentSong(String channelName) {
 		// Read all the JSON information
 		// Need to add the "[" and "]" so that it can be properly parsed 
-		String readJSONFeed = "[" + readJSON(channelName) + "]";
+		String readJSONFeed = "[" + readJSON(channelName, true) + "]";
 		
 		try {
 			// convert it to a json array
@@ -133,26 +180,38 @@ public class RadioApp extends Activity {
 			// get the name of the artist and the song
 			String artist = currentSong.getString("artist");
 			String song = currentSong.getString("song");
+			
+			// don't bother updating if it's still the same song
+			if (song.equals(_currentSong)) {
+				return true;
+			}
+			
+			// update the current song and artist
+			_currentArtist = artist;
+			_currentSong = song;
+			
 			//Log.i(RadioApp.class.getName(),
 			//		"Number of entries " + jsonArray.length());
 			
 			// get all the json objects
-			String text = "";
-			for (int i = 0; i < jsonArray.length(); i++) {
+			//String text = "";
+			/*(for (int i = 0; i < jsonArray.length(); i++) {
 				JSONObject jsonObject = jsonArray.getJSONObject(i);
 				text += jsonObject.toString() + "Next:\n";
 				//Log.i(RadioApp.class.getName(), jsonObject.getString("text"));
-			}
+			}*/
 			
 			// Get the current time
 			//now = new Time();
 			now.setToNow();
-			String delegate = "hh:mm aaa";
+			
 			String time = now.format("%H:%M");
-	        //String time = (String) DateFormat.format(delegate,Calendar.getInstance().getTime());
+			// Alternative:
+			/* String delegate = "hh:mm aaa";
+	           String time = (String) DateFormat.format(delegate,Calendar.getInstance().getTime()); */
 			
 			// update the text
-		    t.setText("Name: " + name + "\nArtist: " + artist + "\nSong: " + song + "\nTime: " + time);//readJSONFeed);
+		    t.setText("Name: " + name + "\nArtist: " + _currentArtist + "\nSong: " + _currentSong + "\nTime: " + time);//readJSONFeed);
 		    return true;
 			
 		} catch (Exception e) {
@@ -164,16 +223,22 @@ public class RadioApp extends Activity {
 	}
 	
 	// Reads the JSON about the channel
-	public String readJSON(String channelName) {
+	public String readJSON(String info, boolean station) {
 		StringBuilder builder = new StringBuilder();
 		
 		// Create a HTTPClient
 		HttpClient client = new DefaultHttpClient();
 		
 		// Open a GET connection to the Yes.com api
-		HttpGet httpGet = new HttpGet(
-				//"http://twitter.com/statuses/user_timeline/vogella.json");
-				"http://api.yes.com/1/station?name=" + channelName);
+		HttpGet httpGet;
+		if (station) {
+			httpGet = new HttpGet(
+				"http://api.yes.com/1/station?name=" + info);
+		} else { // get list of stations instead for the provided city/zipcode
+			httpGet = new HttpGet(
+					"http://api.yes.com/1/stations?loc=" + info);
+		}
+		
 		try {
 			// Read all the lines one-by-one
 			HttpResponse response = client.execute(httpGet);
@@ -239,5 +304,46 @@ public class RadioApp extends Activity {
 	          = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 	    NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
 	    return activeNetworkInfo != null;
+	}
+	
+	/** Inner class used just for listening to the Spinner **/
+	public class MyOnItemSelectedListener implements OnItemSelectedListener {
+
+		// When item selected
+		// Should update the name if it's different from the current one and 
+		// then refresh the song name
+	    public void onItemSelected(AdapterView<?> parent,
+	        View view, int pos, long id) {
+	    	// Get the selected station
+	    	String station = parent.getItemAtPosition(pos).toString();
+	    	
+	    	// Extract the 4-letter name
+	    	Scanner scan = new Scanner(station);
+	    	String name = scan.next();
+	    	
+	    	// Try to update the song if possible
+	    	if (name.equals(_selectedChannelName)) {
+	    		// same channel, so no need to update
+	    		return;
+	    	} else {
+	    		// update
+	    		_selectedChannelName = name;
+	    		boolean update = updateCurrentSong(_selectedChannelName);
+	    		
+	    		// if can't update, make toast saying there was an error with reading
+	    		if (!update) {
+	    			CharSequence text = "Error reading information";
+	    			showToast(text);
+	    		}
+	    	}
+	    	
+	    	
+	     // Toast.makeText(parent.getContext(), "The planet is " +
+	         // parent.getItemAtPosition(pos).toString(), Toast.LENGTH_LONG).show();
+	    }
+
+	    public void onNothingSelected(AdapterView parent) {
+	      // Do nothing.
+	    }
 	}
 }
