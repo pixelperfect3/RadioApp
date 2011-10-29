@@ -63,11 +63,19 @@ public class RadioApp extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
+		// indeterminate amount of time for a task
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		
+		// To indicate it's busy
+		RadioApp.this.setProgressBarIndeterminate(true);
+		RadioApp.this.setProgressBarIndeterminateVisibility(true);
+		
+		//setProgressBarIndeterminateVisibility(true);
+		
 		// get the context
 		//this.context = getApplicationContext();
 		
-		// indeterminate amount of time for a task
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		
 		
 		// set the layout
 		setContentView(R.layout.main);
@@ -143,17 +151,6 @@ public class RadioApp extends Activity {
 		} catch (Exception e) {
 			
 		}
-
-		// Add the listener to the button
-		// ALTERNATIVE TO BUTTON PRESS
-		// The button will refresh the current song being played
-		/*final Button button = (Button) findViewById(R.id.refreshButton);
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // Perform action on click
-            	updateCurrentSong(_selectedChannelName);
-            }
-        });*/
 
 	}
 
@@ -394,6 +391,8 @@ public class RadioApp extends Activity {
 		// constructor
 		public ReadSongTask(Activity activity) {
 			theContext = activity;
+			RadioApp.this.setProgressBarIndeterminate(true);
+			RadioApp.this.setProgressBarIndeterminateVisibility(true);
 			// start the progress dialog
 			dialog = new ProgressDialog(theContext);
 		}
@@ -413,6 +412,8 @@ public class RadioApp extends Activity {
 			dialog.dismiss();
 			String time = now.format("%H:%M");
 			t.setText("Name: " + _selectedChannelName + "\nArtist: " + _currentArtist + "\nSong: " + _currentSong + "\nTime: " + time);
+			RadioApp.this.setProgressBarIndeterminate(false);
+			RadioApp.this.setProgressBarIndeterminateVisibility(false);
 		}
 
 		@Override
