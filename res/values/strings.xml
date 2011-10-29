@@ -3,4 +3,5 @@
     <string name="hello">Hello World, RadioApp!</string>
     <string name="app_name">RadioApp</string>
     <string name="refresh">Refresh</string>
+    <string name="station_selector">Select Station</string>
 </resources>

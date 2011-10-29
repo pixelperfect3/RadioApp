@@ -37,12 +37,20 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/** TODO:
+    -Customize the Spinner
+    -Customize the Button (so they don't look so ugly)
+    -Allow user to search by location
+    -Add look-up location by GPS
+    -Prettier backgrounds
+    -Just generally less ugly **/
+
+
 public class RadioApp extends Activity {
 	// The context
 	Context context;
 	
-	// TODO:
-	// Add a spinner to get a list of all the channels (DONE)
+	// Strings for location, name, artist, song
 	private String _location = "gainesville";
 	private String _selectedChannelName = "WYKS"; // 105.3 Gainesville at first
 	private String _currentArtist = ""; 
@@ -113,6 +121,7 @@ public class RadioApp extends Activity {
 			Spinner s = (Spinner) findViewById(R.id.spinner1);
 			ArrayAdapter adapter = new ArrayAdapter(this,
 					android.R.layout.simple_spinner_item, stations);
+			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			s.setAdapter(adapter);
 			// now set the Spinner to listen for changes
 			s.setOnItemSelectedListener(new MyOnItemSelectedListener());
