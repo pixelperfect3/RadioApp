@@ -33,6 +33,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -71,9 +72,24 @@ public class RadioApp extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		// indeterminate amount of time for a task
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		// set the custom title
+		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		
+		// indeterminate amount of time for a task
+		//requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS); 
+		
+        setContentView(R.layout.main);
+ 
+        // custom title
+        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.window_title);
+		
+        // set the custom texview and icon
+        TextView title = (TextView) findViewById(R.id.title);
+        ImageView icon  = (ImageView) findViewById(R.id.viewIcon);
+        title.setText("Search");
+        icon.setImageResource(R.drawable.icon);
+        
+        
 		// To indicate it's busy
 		RadioApp.this.setProgressBarIndeterminate(true);
 		RadioApp.this.setProgressBarIndeterminateVisibility(true);
@@ -83,11 +99,6 @@ public class RadioApp extends Activity {
 		// get the context
 		//this.context = getApplicationContext();
 		
-		
-		
-		// set the layout
-		setContentView(R.layout.main);
-
 		// get the text view
 		t=(TextView)findViewById(R.id.text); 
 
@@ -165,6 +176,11 @@ public class RadioApp extends Activity {
 
 	// Updates the current song via button click
 	public void refresh(View view) {
+		// progress bar
+		RadioApp.this.setProgressBarIndeterminate(true);
+		RadioApp.this.setProgressBarIndeterminateVisibility(true);
+		
+		
 		// Check if internet connection is available
 		boolean net = this.isNetworkAvailable();
 		if (!net) {

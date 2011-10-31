@@ -6,7 +6,7 @@
     		 android:id="@+id/spinner1" 
     		 android:layout_height="wrap_content"
     		 android:drawSelectorOnTop="true"
-    		 android:prompt="@string/station_selector"></Spinner>
+    		 android:prompt="@string/station_selector" android:layout_marginTop="20dip"></Spinner>
     <TextView android:id="@+id/text" android:textSize="25dp" android:layout_margin="20dip" android:text="@string/hello" android:layout_width="fill_parent" android:layout_height="wrap_content"></TextView>
     <Button android:textSize="25dp" android:text="@string/refresh" android:onClick="refresh" android:id="@+id/refreshButton" android:layout_margin="20dip" android:layout_height="wrap_content" android:layout_width="fill_parent"></Button>
 </LinearLayout>
