@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -59,7 +60,24 @@ public class MainActivity extends Activity {
 			return;
 		}
 		
+		// check internet connection
+		if (!this.isNetworkAvailable()) {
+			showDialog("Not Internet connection. Please turn on wi-fi or your data connection.");
+			return;
+		}
+		
 		// else, do a search
+		
+		// Temporary:
+		// Start the other activity
+		Intent intent = new Intent(this, RadioApp.class);
+		/** Add Bundle here:
+		
+		Bundle parameters = new Bundle();
+		parameters.putString("PARAM_IDENT", "parameter_value");
+		intent.putExtras(parameters); */
+		
+		this.startActivity(intent);
 	}
 	
 	// For a custom title at the top
