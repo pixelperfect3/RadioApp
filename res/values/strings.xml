@@ -4,4 +4,5 @@
     <string name="app_name">RadioApp</string>
     <string name="refresh">Refresh</string>
     <string name="station_selector">Select Station</string>
+    <string name="searchText">Search by City, Station, etc.</string>
 </resources>

@@ -6,13 +6,22 @@
 <uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <application android:icon="@drawable/icon" android:label="@string/app_name" android:theme="@style/CustomTheme">
-        <activity android:name=".RadioApp"
+    <application android:icon="@drawable/icon" android:label="@string/app_name" android:theme="@android:style/Theme.Light">
+     	<!--  The Main Activity (for searching and viewing favourites ) -->
+    	<activity android:name=".MainActivity" 
                   android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+         <!--  The Activity for a City (show's list of stations) -->
+        <activity android:name=".RadioApp"  
+                  android:label="@string/app_name">
+            <!--   <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter> -->
         </activity>
 
     </application>

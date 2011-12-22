@@ -1,10 +1,28 @@
 <resources>
+	<!--  Custom Window Title Background -->
     <style name="CustomWindowTitleBackground">
         <item name="android:background">#566D7E</item>
     </style>
  
+ 	<!--  Custom Window style -->
     <style name="CustomTheme" parent="android:Theme">
         <item name="android:windowTitleSize">50dip</item>
         <item name="android:windowTitleBackgroundStyle">@style/CustomWindowTitleBackground</item>
     </style>
+    
+    <!--  Custom EditText styles -->
+     <style name="textTheme" parent="@android:style/Widget.EditText">
+    	<item name="android:background">#000000</item>
+        <item name="android:editTextStyle">@drawable/edit_text_custom</item>
+    </style>
+    
+    <!--  custom text -->
+    <style name="text_custom" parent="@android:style/Widget.EditText">
+	 	<item name="android:focusable">true</item>
+	 	<item name="android:focusableInTouchMode">true</item>
+	 	<item name="android:clickable">true</item>
+	 	<item name="android:background">@drawable/edit_text_custom</item>
+	 	<item name="android:gravity">center_vertical</item>
+ </style>
+    
 </resources>

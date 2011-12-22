@@ -78,7 +78,8 @@ public class RadioApp extends Activity {
 		// indeterminate amount of time for a task
 		//requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS); 
 		
-        setContentView(R.layout.main);
+		// set layout to the "city"
+        setContentView(R.layout.city);
  
         // custom title
         getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.window_title);
@@ -149,8 +150,7 @@ public class RadioApp extends Activity {
 		now = new Time();
 
 		// Check if internet connection is available
-		boolean net = this.isNetworkAvailable();
-		if (!net) {
+		if (!isNetworkAvailable()) {
 			//showToast("No internet connection!");
 
 			// Create an alert dialog
@@ -180,11 +180,8 @@ public class RadioApp extends Activity {
 		RadioApp.this.setProgressBarIndeterminate(true);
 		RadioApp.this.setProgressBarIndeterminateVisibility(true);
 		
-		
-		// Check if internet connection is available
-		boolean net = this.isNetworkAvailable();
-		if (!net) {
-			// Create an alert dialog
+		if (!isNetworkAvailable()) {
+			// Alert!
 			showDialog("No Internet Connection! Enable WiFi or 3G");
 			return;
 		}
