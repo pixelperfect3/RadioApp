@@ -53,7 +53,7 @@ public class RadioApp extends Activity {
 	
 	// Strings for location, name, artist, song
 	private String _location = "gainesville";
-	private String _selectedChannelName = "WYKS"; // 105.3 Gainesville at first
+	private String _selectedChannelName = ""; // 105.3 Gainesville at first - WYKS
 	private String _currentArtist = ""; 
 	private String _currentSong = "";
 
@@ -122,21 +122,32 @@ public class RadioApp extends Activity {
 
 			// Create the array of strings which will be used for populating the spinner
 			String[] stations = new String[jsonArray.length()];
+			
+			// If not stations found
+			if (stations.length == 0) {
+				showDialog("No stations found!");
+				finish(); // TODO: Properly show dialog
+			}
+			
 			// go through each station
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONObject jsonObject = jsonArray.getJSONObject(i);
 				// get the station name
 				String name = jsonObject.getString("name");
 				// get the description
-				String desc = jsonObject.getString("desc");
+				String desc = properFormat(jsonObject.getString("desc"));
 
 				// add to the string array
 				stations[i] = name + " " + desc;
 			}
-
+			
+			// set selected channel to the first one
+			this._selectedChannelName = stations[0];
+			
+			
 			// Populate the Spinner
 			Spinner s = (Spinner) findViewById(R.id.spinner1);
-			ArrayAdapter adapter = new ArrayAdapter(this,
+			ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
 					android.R.layout.simple_spinner_item, stations);
 			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			s.setAdapter(adapter);
@@ -165,16 +176,18 @@ public class RadioApp extends Activity {
 
 		// Try to read the JSON information and then update the TextView
 		//boolean update = updateCurrentSong(_selectedChannelName);
-		AsyncTask readTask = new ReadSongTask(this).execute(_selectedChannelName);//updateCurrentSong(_selectedChannelName);
-
-		try {
-			// if can't update, make toast saying there was an error with reading
-			if ( (!(Boolean)readTask.get()) ) { //(!update) {
-				CharSequence text = "Error reading information";
-				showToast(text);
+		if (this._selectedChannelName != "") {
+			AsyncTask readTask = new ReadSongTask(this).execute(_selectedChannelName);//updateCurrentSong(_selectedChannelName);
+	
+			try {
+				// if can't update, make toast saying there was an error with reading
+				if ( (!(Boolean)readTask.get()) ) { //(!update) {
+					CharSequence text = "Error reading information";
+					showToast(text);
+				}
+			} catch (Exception e) {
+				
 			}
-		} catch (Exception e) {
-			
 		}
 
 	}
@@ -230,8 +243,8 @@ public class RadioApp extends Activity {
 			JSONObject currentSong = firstJson.getJSONObject("now");
 
 			// get the name of the artist and the song
-			String artist = currentSong.getString("artist");
-			String song = currentSong.getString("song");
+			String artist = properFormat(currentSong.getString("artist"));
+			String song = properFormat(currentSong.getString("song"));
 
 			// don't bother updating if it's still the same song
 			if (song.equals(_currentSong)) {
@@ -313,8 +326,12 @@ public class RadioApp extends Activity {
 				while ((line = reader.readLine()) != null) {
 					builder.append(line);
 				}
+				
+				Log.e(RadioApp.class.toString(), "RESPONSE BUILT: " + builder.toString());
+				
 			} else {
 				Log.e(RadioApp.class.toString(), "Failed to download file");
+				finish();
 			}
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
@@ -412,6 +429,16 @@ public class RadioApp extends Activity {
 		}
 	}
 
+	// Formats the HTML Strings properly
+	// TODO: (&lt; &gt;)?
+	private String properFormat(String str) {
+		String proper = str.replaceAll("&amp;", "&");
+		proper = proper.replaceAll("&quot;", "\"");
+		proper = proper.replaceAll("&apos;", "\'");
+		
+		return proper;
+	}
+	
 	/***
 	 * AsyncTask class for reading info about a station
 	 */
