@@ -62,7 +62,7 @@ public class MainActivity extends Activity {
 		
 		// check internet connection
 		if (!this.isNetworkAvailable()) {
-			showDialog("Not Internet connection. Please turn on wi-fi or your data connection.");
+			showDialog("No Internet connection! Please turn on wi-fi or your data connection.");
 			return;
 		}
 		
@@ -71,11 +71,11 @@ public class MainActivity extends Activity {
 		// Temporary:
 		// Start the other activity
 		Intent intent = new Intent(this, RadioApp.class);
-		/** Add Bundle here:
+		/** Add Bundle here (City, location, etc.): **/
 		
 		Bundle parameters = new Bundle();
-		parameters.putString("PARAM_IDENT", "parameter_value");
-		intent.putExtras(parameters); */
+		parameters.putString("CITY_NAME", toSearch);
+		intent.putExtras(parameters);
 		
 		this.startActivity(intent);
 	}

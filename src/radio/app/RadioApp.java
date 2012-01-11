@@ -103,6 +103,11 @@ public class RadioApp extends Activity {
 		// get the text view
 		t=(TextView)findViewById(R.id.text); 
 
+		// get the city from the Bundle passed in
+		String city = getIntent().getExtras().getString("CITY_NAME");
+		if (city != null)
+			_location = city;
+		
 		/** Setup the Spinner by populating it with the list of Gainesville radio stations **/
 
 		String channelJSON = readJSON(_location, false);
@@ -274,6 +279,11 @@ public class RadioApp extends Activity {
 
 	// Reads the JSON about the channel
 	public String readJSON(String info, boolean station) {
+		// Format the info properly (for city)
+		info = info.trim();
+		// replace spaces with proper html?
+		info = info.replaceAll(" ", "&nbsp;");
+		
 		StringBuilder builder = new StringBuilder();
 
 		// Create a HTTPClient
