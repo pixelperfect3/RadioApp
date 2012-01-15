@@ -9,6 +9,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -18,6 +19,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
@@ -26,19 +28,30 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /** TODO:
+ 	-Look up default city - if not there, then show this screen, otherwise move to the second screen. (PARTIALLY DONE)
     -Custom background
     -Have main app name with search box (should lead to different activity)
-    -Show favourite stations
-    -Allow location by GPS **/
+    -Show favourite stations (cities?)
+    -Allow location by GPS (kinda working - get's location)
+    -Add autocomplete option (by cities)
+    -Add ImageButtons for search (the magnifying glass and the location icon from Google Maps)
+ 	 	-Add onfocus, onclick images
+ **/
 
 
 public class MainActivity extends Activity {
 	/** PROPERTIES **/
+	
+	// Search text box
 	EditText searchText;
 	
+	// Shared preferences name
+	public final String PREFERENCE_FILENAME = "RadioAppPreferences";
+	private String defaultCity = "";
+	
 	// GPS
-	private LocationManager myLocationManager;
-	private LocationListener myLocationListener;
+	//private LocationManager myLocationManager;
+	//private LocationListener myLocationListener;
 	private double latitude, longitude;
 	
 	/** Called when the activity is first created. */
@@ -52,38 +65,53 @@ public class MainActivity extends Activity {
 		// set the custom title
 		//setCustomTitle();
 		
-		
 		// Change to main layout
         setContentView(R.layout.main);
+        
+        
         
         // Retrieve search textbox
         searchText = (EditText) findViewById(R.id.searchBox);
         
-        // GPS Managers
-        /*myLocationManager = (LocationManager)getSystemService(
-        		  Context.LOCATION_SERVICE);
-
-        myLocationListener = new MyLocationListener();
-   		
-        myLocationManager.requestLocationUpdates(
-        		        LocationManager.GPS_PROVIDER,
-        		        0,
-        		        0,
-        		        myLocationListener);*/
+        // Set the listener for the Search Textbox - on pressing enter should start a search
+        TextView.OnEditorActionListener exampleListener = new TextView.OnEditorActionListener() {
+        	public boolean onEditorAction(TextView exampleView, int actionId, KeyEvent event) {
+        		   //if(actionId == EditorInfo.IME_NULL){
+        			   startSearch(searchText);//match this behavior to your 'Send' (or Confirm) button
+        		  // }
+        		   return true;
+        		}
+        };
+        searchText.setOnEditorActionListener(exampleListener);
         
         // Get last known location
         String locationProvider = LocationManager.NETWORK_PROVIDER;
         // Or use LocationManager.GPS_PROVIDER
 
+        // Store latitude and longitude
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
         latitude = lastKnownLocation.getLatitude();
         longitude = lastKnownLocation.getLongitude();
         Log.v("GPS", "Latitude: " + latitude + ", Longitude: " + longitude);
         
-        // Attach listener to button
-        //Button searchButton = (Button) findViewById(R.id.searchButton);
-        //searchButton.
+        /** Check Shared preferences - if there is a default city already stored, just show the stations for that **/
+        SharedPreferences settings = getSharedPreferences(this.PREFERENCE_FILENAME, MODE_PRIVATE);
+       
+        
+        if (settings.contains("DEFAULT")) { 	// Default City Stored
+        	String defaultCity = settings.getString("DEFAULT", "");
+        	// start activity with that city
+        	search(defaultCity);
+        }
+        else { // TEMPORARY TODO: Store Gainesville as default city
+        	// WORKS! Commented out for now
+        	/*SharedPreferences.Editor prefEditor = settings.edit();
+        	prefEditor.putString("DEFAULT", "Gainesville");
+        	prefEditor.commit();*/
+        }
+        
+        // End of OnCreate
 	}
 	
 	/** Method called when search button is pressed **/
@@ -102,7 +130,7 @@ public class MainActivity extends Activity {
 	}
 	
 	/** Method called when gps search button is pressed **/
-	private void searchByGPS() {
+	public void searchByGPS(View v) {
 		/*****
 		 * TEMPORARY: Convert Latitude/Longitude to city
 		 */
