@@ -12,15 +12,18 @@
         	android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
 		<!--  Search Button -->
         <!--  Info about the search text -->
-        <LinearLayout android:id="@+id/linearLayout2" android:layout_height="wrap_content" android:layout_below="@+id/mainLabel" android:layout_width="fill_parent">
+        <LinearLayout android:id="@+id/linearLayout2" android:layout_height="wrap_content" android:layout_below="@+id/mainLabel" android:layout_width="fill_parent" android:gravity="center_vertical">
             <EditText android:id="@+id/searchBox" 
-            	android:paddingBottom="10dip" android:paddingTop="10dip" android:paddingRight="10dip" android:paddingLeft="10dip"
-            	android:layout_width="wrap_content" android:layout_weight="0.95" android:layout_height="wrap_content" android:inputType="text" android:lines="1"></EditText>
-            <Button android:id="@+id/searchButton" 
-            		android:text="Search" 
-            		android:layout_width="wrap_content" android:layout_height="fill_parent"
-            		android:layout_weight="0.05" 
-            		android:onClick="startSearch"></Button>
+            	android:paddingBottom="5dip" android:paddingTop="10dip" android:paddingRight="0dip" android:paddingLeft="10dip"
+            	android:layout_width="wrap_content" android:layout_height="wrap_content" android:inputType="text" android:lines="1" android:layout_weight="0.98" android:singleLine="true"></EditText>
+            <ImageButton android:id="@+id/searchButton" 
+            		android:background="@android:drawable/ic_menu_search"
+            		android:onClick="startSearch" 
+            		android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="0.01"></ImageButton>
+            <ImageButton android:text="GPS" android:id="@+id/gpsButton" 
+            		android:background="@android:drawable/ic_menu_mylocation"
+            		android:onClick="searchByGPS" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="0.01"></ImageButton>
+            		<!--   android:background="@android:color/white" -->
         </LinearLayout>
        
        <TextView android:text="@string/searchText" 

@@ -1,14 +1,14 @@
 <resources>
 	<!--  Custom Window Title Background -->
     <style name="CustomWindowTitleBackground">
-        <item name="android:background">#566D7E</item>
+        <item name="android:background">#6495ed</item>
     </style>
  
  	<!--  Custom Window style -->
-    <style name="CustomTheme" parent="android:Theme">
+    <style name="CustomTheme">
         <item name="android:windowTitleSize">50dip</item>
-        <item name="android:windowTitleBackgroundStyle">@style/CustomWindowTitleBackground</item>
     </style>
+    <!--   <item name="android:windowTitleBackgroundStyle">@style/CustomWindowTitleBackground</item> -->
     
     <!--  Custom EditText styles -->
      <style name="textTheme" parent="@android:style/Widget.EditText">

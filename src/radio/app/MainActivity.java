@@ -43,16 +43,16 @@ public class MainActivity extends Activity {
 	/** PROPERTIES **/
 	
 	// Search text box
-	EditText searchText;
+	EditText _searchText;
 	
 	// Shared preferences name
 	public final String PREFERENCE_FILENAME = "RadioAppPreferences";
-	private String defaultCity = "";
+	private String _defaultCity = "";
 	
 	// GPS
 	//private LocationManager myLocationManager;
 	//private LocationListener myLocationListener;
-	private double latitude, longitude;
+	private double _latitude, _longitude;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -60,7 +60,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		
 		// No Title - Temporary TODO
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		//requestWindowFeature(Window.FEATURE_NO_TITLE);
 		
 		// set the custom title
 		//setCustomTitle();
@@ -71,18 +71,18 @@ public class MainActivity extends Activity {
         
         
         // Retrieve search textbox
-        searchText = (EditText) findViewById(R.id.searchBox);
+        _searchText = (EditText) findViewById(R.id.searchBox);
         
         // Set the listener for the Search Textbox - on pressing enter should start a search
         TextView.OnEditorActionListener exampleListener = new TextView.OnEditorActionListener() {
         	public boolean onEditorAction(TextView exampleView, int actionId, KeyEvent event) {
         		   //if(actionId == EditorInfo.IME_NULL){
-        			   startSearch(searchText);//match this behavior to your 'Send' (or Confirm) button
+        			   startSearch(_searchText);//match this behavior to your 'Send' (or Confirm) button
         		  // }
         		   return true;
         		}
         };
-        searchText.setOnEditorActionListener(exampleListener);
+        _searchText.setOnEditorActionListener(exampleListener);
         
         // Get last known location
         String locationProvider = LocationManager.NETWORK_PROVIDER;
@@ -91,9 +91,14 @@ public class MainActivity extends Activity {
         // Store latitude and longitude
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
-        latitude = lastKnownLocation.getLatitude();
-        longitude = lastKnownLocation.getLongitude();
-        Log.v("GPS", "Latitude: " + latitude + ", Longitude: " + longitude);
+        try {
+        	_latitude = lastKnownLocation.getLatitude();
+        	_longitude = lastKnownLocation.getLongitude();
+        	Log.v("GPS", "Latitude: " + _latitude + ", Longitude: " + _longitude);
+        } catch (Exception e) {
+        	Log.e("GPS", "Could not get lat/lon of location");
+        	
+        }
         
         /** Check Shared preferences - if there is a default city already stored, just show the stations for that **/
         SharedPreferences settings = getSharedPreferences(this.PREFERENCE_FILENAME, MODE_PRIVATE);
@@ -106,8 +111,9 @@ public class MainActivity extends Activity {
         }
         else { // TEMPORARY TODO: Store Gainesville as default city
         	// WORKS! Commented out for now
-        	/*SharedPreferences.Editor prefEditor = settings.edit();
-        	prefEditor.putString("DEFAULT", "Gainesville");
+        	SharedPreferences.Editor prefEditor = settings.edit();
+        	prefEditor.remove("DEFAULT");
+        	/*prefEditor.putString("DEFAULT", "Gainesville");
         	prefEditor.commit();*/
         }
         
@@ -117,11 +123,11 @@ public class MainActivity extends Activity {
 	/** Method called when search button is pressed **/
 	public void startSearch(View v) {
 		// read text to search
-		String toSearch = searchText.getText().toString();
+		String toSearch = _searchText.getText().toString();
 		
 		// if empty, return nothing - alert for now TODO:
 		if (toSearch.equals("")) {
-			showToast("Nothing entered!");
+			showToast("Nothing entered!", true);
 			return;
 		}
 		
@@ -138,18 +144,18 @@ public class MainActivity extends Activity {
 		List<Address> addresses;
 		String locality = "";
 		try {
-			addresses = gcd.getFromLocation(this.latitude, this.longitude, 1);
+			addresses = gcd.getFromLocation(this._latitude, this._longitude, 1);
 			if (addresses.size() > 0) { 
 			    locality = addresses.get(0).getLocality();//Log.e("GPS LOCALITY", addresses.get(0).getLocality());
 			    this.search(locality);
 			}
 			else {
-				showToast("Error obtaining location.");
+				showToast("Error obtaining location.", true);
 				return;
 			}
 			
 		} catch (IOException e) {
-			showToast("Error obtaining location.");
+			showToast("Error obtaining location.", true);
 			return;
 		}
 	}
@@ -159,7 +165,7 @@ public class MainActivity extends Activity {
 		// check internet connection
 		if (!this.isNetworkAvailable()) {
 			//showDialog("No Internet connection! Please turn on wi-fi or your data connection.");
-			showToast("No Internet connection! Please turn on wi-fi or your data connection.");
+			showToast("No Internet connection! Please turn on wi-fi or your data connection.", false);
 			return;
 		}
 		
@@ -182,7 +188,7 @@ public class MainActivity extends Activity {
 		
         // set the custom texview and icon
         TextView title = (TextView) findViewById(R.id.title);
-        ImageView icon  = (ImageView) findViewById(R.id.viewIcon);
+        ImageView icon  = (ImageView) findViewById(R.id.windowSearchButton);
         title.setText("Search");
         icon.setImageResource(R.drawable.icon);
 	}
@@ -222,9 +228,9 @@ public class MainActivity extends Activity {
 	}
 	
 	/** Helper method for showing a Toast notification **/
-	private void showToast(CharSequence text) {
+	private void showToast(CharSequence text, boolean timeShort) {
 		Context context = getApplicationContext();
-		int duration = Toast.LENGTH_LONG;//  Toast.LENGTH_SHORT;
+		int duration = timeShort? Toast.LENGTH_SHORT : Toast.LENGTH_LONG; // long or short?
 
 		Toast toast = Toast.makeText(context, text, duration);
 		toast.show();

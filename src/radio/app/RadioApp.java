@@ -41,10 +41,30 @@ import android.widget.Toast;
 /** TODO:
     -Customize the Spinner
     -Customize the Button (so they don't look so ugly)
-    -Allow user to search by location
-    -Add look-up location by GPS
     -Prettier backgrounds
-    -Just generally less ugly **/
+    -Just generally less ugly
+    -Use star icons for favouriting
+    -Add arrows for moving forward/backward along radio stations
+    -Maybe arrows for showing previously played songs? 
+    
+    -For songs, show options to explore in Amazon/google Music, etc. To open a link, here's an example:
+    	Intent i = new Intent(Intent.ACTION_VIEW, 
+       		Uri.parse("http://www.amazon.com/s/url=search-alias=digital-music&field-keywords=lady+gaga+born+this+way"));
+		startActivity(i);
+    
+      OR:
+      
+      	Intent i = new Intent();
+	  	i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		i.setAction(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
+		i.putExtra(SearchManager.QUERY, mSong.getArtits() + " " + mSong.getName());
+		i.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, "artist");
+		i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "album");
+		i.putExtra(MediaStore.EXTRA_MEDIA_TITLE, mSong.getName());
+		i.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, "audio/*");
+		startActivity(Intent.createChooser(i, "Search for " + mSong.getName()));
+    
+    **/
 
 
 public class RadioApp extends Activity {
@@ -58,7 +78,7 @@ public class RadioApp extends Activity {
 	private String _currentSong = "";
 
 	// The TextView
-	TextView t;
+	TextView _locationTV, _stationInfoTV;
 
 	// The Button
 	Button button;
@@ -86,85 +106,31 @@ public class RadioApp extends Activity {
 		
         // set the custom texview and icon
         TextView title = (TextView) findViewById(R.id.title);
-        ImageView icon  = (ImageView) findViewById(R.id.viewIcon);
-        title.setText("Search");
-        icon.setImageResource(R.drawable.icon);
+        ImageView icon  = (ImageView) findViewById(R.id.windowSearchButton);
+        title.setText("Stations");
+        //icon.setImageResource(R.drawable.icon);
         
         
 		// To indicate it's busy
-		RadioApp.this.setProgressBarIndeterminate(true);
-		RadioApp.this.setProgressBarIndeterminateVisibility(true);
+		//RadioApp.this.setProgressBarIndeterminate(true);
+		//RadioApp.this.setProgressBarIndeterminateVisibility(true);
 		
 		//setProgressBarIndeterminateVisibility(true);
 		
 		// get the context
 		//this.context = getApplicationContext();
 		
-		// get the text view
-		t=(TextView)findViewById(R.id.text); 
+		// get the text views
+		this._stationInfoTV =(TextView)findViewById(R.id.text);
+		this._locationTV = (TextView)findViewById(R.id.location);
 
 		// get the city from the Bundle passed in
 		String city = getIntent().getExtras().getString("CITY_NAME");
-		if (city != null)
+		if (city != null) {
 			_location = city;
-		
-		/** Setup the Spinner by populating it with the list of Gainesville radio stations **/
-
-		String channelJSON = readJSON(_location, false);
-		Log.i(RadioApp.class.getName(),"channelJSON: " + channelJSON);
-
-		try {
-			// create the json object from the string
-			JSONObject jsonobj = new JSONObject(channelJSON);
-
-			// get the array of stations
-			JSONArray jsonArray = new JSONArray(jsonobj.getString("stations"));
-
-			// Create the array of strings which will be used for populating the spinner
-			String[] stations = new String[jsonArray.length()];
-			
-			// If not stations found
-			if (stations.length == 0) {
-				showDialog("No stations found!");
-				finish(); // TODO: Properly show dialog
-			}
-			
-			// go through each station
-			for (int i = 0; i < jsonArray.length(); i++) {
-				JSONObject jsonObject = jsonArray.getJSONObject(i);
-				// get the station name
-				String name = jsonObject.getString("name");
-				// get the description
-				String desc = properFormat(jsonObject.getString("desc"));
-
-				// add to the string array
-				stations[i] = name + " " + desc;
-			}
-			
-			// set selected channel to the first one
-			this._selectedChannelName = stations[0];
-			
-			
-			// Populate the Spinner
-			Spinner s = (Spinner) findViewById(R.id.spinner1);
-			ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-					android.R.layout.simple_spinner_item, stations);
-			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			s.setAdapter(adapter);
-			// now set the Spinner to listen for changes
-			s.setOnItemSelectedListener(new MyOnItemSelectedListener());
-
-
-			//Log.i(RadioApp.class.getName(),"JSON LENGTH: " + jsonArray.length());
-			// get the first object which has all the info
-			//JSONObject firstJson = jsonArray.getJSONObject(1);
-		} catch (Exception e) {
-			Log.i(RadioApp.class.getName(), "JSON Exception: " + e.toString());
+			this._locationTV.setText(_location);
 		}
-
-		// the Time object
-		now = new Time();
-
+		
 		// Check if internet connection is available
 		if (!isNetworkAvailable()) {
 			//showToast("No internet connection!");
@@ -173,6 +139,39 @@ public class RadioApp extends Activity {
 			showDialog("No Internet Connection! Enable WiFi or 3G");
 			return;
 		}
+		
+		/** Setup the Spinner by populating it with the list of radio stations **/
+		// read the list of stations in an asynctask
+		AsyncTask<String, Void, String[]> readStationsTask = new ReadStationsTask(this).execute();
+		
+		try {
+			// get list of all the stations from the task
+			String[] stations = new String[1];
+			
+			stations = readStationsTask.get();
+			
+			if (stations != null) {
+				// set selected channel to the first one
+				this._selectedChannelName = stations[0];
+				
+				
+				// Populate the Spinner
+				Spinner s = (Spinner) findViewById(R.id.spinner1);
+				ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+						android.R.layout.simple_spinner_item, stations);
+				adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+				s.setAdapter(adapter);
+				// now set the Spinner to listen for changes
+				s.setOnItemSelectedListener(new MyOnItemSelectedListener());
+			}
+		} catch (Exception e) {
+			Log.e("Reading Stations", "Cannot execute AsyncTask");
+		}
+
+		// the Time object
+		now = new Time();
+
+		
 
 		// Try to read the JSON information and then update the TextView
 		//boolean update = updateCurrentSong(_selectedChannelName);
@@ -183,16 +182,19 @@ public class RadioApp extends Activity {
 				// if can't update, make toast saying there was an error with reading
 				if ( (!(Boolean)readTask.get()) ) { //(!update) {
 					CharSequence text = "Error reading information";
-					showToast(text);
+					showToast(text, true);
 				}
 			} catch (Exception e) {
 				
 			}
 		}
+		
+		//RadioApp.this.setProgressBarIndeterminate(false);
+		//RadioApp.this.setProgressBarIndeterminateVisibility(false);
 
 	}
 
-	// Updates the current song via button click
+	/** Updates the current song via button click **/
 	public void refresh(View view) {
 		// progress bar
 		RadioApp.this.setProgressBarIndeterminate(true);
@@ -211,7 +213,7 @@ public class RadioApp extends Activity {
 			// if can't update, make toast saying there was an error with reading
 			if ( (!(Boolean)readTask.get()) ) { //(!update) {
 				CharSequence text = "Error reading information";
-				showToast(text);
+				showToast(text, true);
 			}
 		} catch (Exception e) {
 			
@@ -223,7 +225,7 @@ public class RadioApp extends Activity {
 		}*/
 	}
 
-	// Updates the current song on the selected channel
+	/** Updates the current song on the selected channel **/
 	private boolean updateCurrentSong(String channelName) {
 		// Read all the JSON information
 		// Need to add the "[" and "]" so that it can be properly parsed 
@@ -290,7 +292,7 @@ public class RadioApp extends Activity {
 		return false;
 	}
 
-	// Reads the JSON about the channel
+	/** Reads the JSON about the channel **/
 	public String readJSON(String info, boolean station) {
 		// Format the info properly (for city)
 		info = info.trim();
@@ -335,19 +337,19 @@ public class RadioApp extends Activity {
 			}
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
-			t.setText("Exception " + e.toString());
+			this._stationInfoTV.setText("Exception " + e.toString());
 		} catch (IOException e) {
 			e.printStackTrace();
-			t.setText("Exception " + e.toString());
+			this._stationInfoTV.setText("Exception " + e.toString());
 		}
 		return builder.toString();
 	}
 
 
-	// Helper method for showing a Toast notification
-	private void showToast(CharSequence text) {
+	/** Helper method for showing a Toast notification **/
+	private void showToast(CharSequence text, boolean timeShort) {
 		Context context = getApplicationContext();
-		int duration = Toast.LENGTH_LONG;//  Toast.LENGTH_SHORT;
+		int duration = timeShort? Toast.LENGTH_SHORT : Toast.LENGTH_LONG; // long or short?
 
 		Toast toast = Toast.makeText(context, text, duration);
 		toast.show();
@@ -375,7 +377,7 @@ public class RadioApp extends Activity {
 		alert.show();
 	}
 
-	// Checks if internet connection is available
+	/** Checks if internet connection is available **/
 	private boolean isNetworkAvailable() {
 		ConnectivityManager connectivityManager 
 		= (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -412,7 +414,7 @@ public class RadioApp extends Activity {
 					// if can't update, make toast saying there was an error with reading
 					if ( (!(Boolean)readTask.get()) ) { //(!update) {
 						CharSequence text = "Error reading information";
-						showToast(text);
+						showToast(text, true);
 					}
 				} catch (Exception e) {
 					
@@ -438,6 +440,99 @@ public class RadioApp extends Activity {
 		
 		return proper;
 	}
+	
+	/***
+	 * AsyncTask class for reading all the stations
+	 */
+	private class ReadStationsTask extends AsyncTask<String, Void, String[]> {
+		// The dialog bar to show indeterminate progress
+		private ProgressDialog dialog;
+		private Context theContext;
+
+		// constructor
+		public ReadStationsTask(Activity activity) {
+			theContext = activity;
+			RadioApp.this.setProgressBarIndeterminate(true);
+			RadioApp.this.setProgressBarIndeterminateVisibility(true);
+			// start the progress dialog
+			dialog = new ProgressDialog(theContext);
+		}
+		
+		@Override
+		protected String[] doInBackground(String... params) {
+			// perform long running operation operation
+			// update the list of stations
+			
+			String channelJSON = readJSON(_location, false);
+			Log.i(RadioApp.class.getName(),"channelJSON: " + channelJSON);
+
+			try {
+				// create the json object from the string
+				JSONObject jsonobj = new JSONObject(channelJSON);
+
+				// get the array of stations
+				JSONArray jsonArray = new JSONArray(jsonobj.getString("stations"));
+
+				/** TODO: Perhaps part below should be in postExecute()? **/
+				
+				// Create the array of strings which will be used for populating the spinner
+				String[] stations = new String[jsonArray.length()];
+				
+				// If not stations found
+				if (stations.length == 0) {
+					showToast("No stations found!", false);
+					finish(); // TODO: Properly show dialog
+				}
+				
+				// go through each station
+				for (int i = 0; i < jsonArray.length(); i++) {
+					JSONObject jsonObject = jsonArray.getJSONObject(i);
+					// get the station name
+					String name = jsonObject.getString("name");
+					// get the description
+					String desc = properFormat(jsonObject.getString("desc"));
+
+					// add to the string array
+					stations[i] = name + " " + desc;
+				}
+				
+				return stations;
+				
+			} catch (Exception e) {
+				Log.e(RadioApp.class.getName(), "JSON Exception: " + e.toString());
+				return null;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(String[] result) {
+			// execution of result of Long time consuming operation
+			// dismiss the dialog
+			dialog.dismiss();
+			RadioApp.this.setProgressBarIndeterminate(false);
+			RadioApp.this.setProgressBarIndeterminateVisibility(false);
+			/*String time = now.format("%H:%M");
+			_stationInfoTV.setText("Name: " + _selectedChannelName + "\nArtist: " + _currentArtist + "\nSong: " + _currentSong + "\nTime: " + time);
+			RadioApp.this.setProgressBarIndeterminate(false);
+			RadioApp.this.setProgressBarIndeterminateVisibility(false);*/
+		}
+
+		@Override
+		protected void onPreExecute() {
+			// Things to be done before execution of long running operation. For example showing ProgessDialog
+			
+			// set the properties of the progressdialog
+			// make sure it's indeterminate
+			this.dialog.setMessage("Loading info");
+			this.dialog.setIndeterminate(true);
+	        this.dialog.show();
+		}
+
+		@Override
+		protected void onProgressUpdate(Void... values) {
+			// Things to be done while execution of long running operation is in progress. For example updating ProgessDialog
+		}
+	} /** End of AsyncTask class **/
 	
 	/***
 	 * AsyncTask class for reading info about a station
@@ -470,7 +565,7 @@ public class RadioApp extends Activity {
 			// dismiss the dialog
 			dialog.dismiss();
 			String time = now.format("%H:%M");
-			t.setText("Name: " + _selectedChannelName + "\nArtist: " + _currentArtist + "\nSong: " + _currentSong + "\nTime: " + time);
+			_stationInfoTV.setText("Name: " + _selectedChannelName + "\nArtist: " + _currentArtist + "\nSong: " + _currentSong + "\nTime: " + time);
 			RadioApp.this.setProgressBarIndeterminate(false);
 			RadioApp.this.setProgressBarIndeterminateVisibility(false);
 		}

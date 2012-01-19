@@ -12,23 +12,30 @@ public final class R {
     }
     public static final class drawable {
         public static final int edit_text_custom=0x7f020000;
-        public static final int icon=0x7f020001;
+        public static final int ic_menu_mylocation=0x7f020001;
+        public static final int ic_menu_refresh=0x7f020002;
+        public static final int ic_menu_search=0x7f020003;
+        public static final int ic_menu_star=0x7f020004;
+        public static final int icon=0x7f020005;
     }
     public static final class id {
-        public static final int favoritesLabel=0x7f05000a;
-        public static final int header=0x7f05000b;
-        public static final int linearLayout1=0x7f050009;
-        public static final int linearLayout2=0x7f050005;
-        public static final int mainLabel=0x7f050004;
-        public static final int refreshButton=0x7f050002;
-        public static final int relativeLayout1=0x7f050003;
-        public static final int searchBox=0x7f050006;
-        public static final int searchButton=0x7f050007;
-        public static final int searchView1=0x7f050008;
-        public static final int spinner1=0x7f050001;
+        public static final int favoritesLabel=0x7f05000c;
+        public static final int gpsButton=0x7f050009;
+        public static final int header=0x7f05000d;
+        public static final int linearLayout1=0x7f05000b;
+        public static final int linearLayout2=0x7f050006;
+        public static final int location=0x7f050001;
+        public static final int mainLabel=0x7f050005;
+        public static final int refreshButton=0x7f050003;
+        public static final int relativeLayout1=0x7f050004;
+        public static final int searchBox=0x7f050007;
+        public static final int searchButton=0x7f050008;
+        public static final int searchView1=0x7f05000a;
+        public static final int spinner1=0x7f050002;
         public static final int text=0x7f050000;
-        public static final int title=0x7f05000c;
-        public static final int viewIcon=0x7f05000d;
+        public static final int title=0x7f05000e;
+        public static final int windowRefreshButton=0x7f050010;
+        public static final int windowSearchButton=0x7f05000f;
     }
     public static final class layout {
         public static final int city=0x7f030000;
@@ -49,7 +56,8 @@ public final class R {
         /**   Custom Window Title Background 
          */
         public static final int CustomWindowTitleBackground=0x7f040000;
-        /**   Custom EditText styles 
+        /**    <item name="android:windowTitleBackgroundStyle">@style/CustomWindowTitleBackground</item> 
+  Custom EditText styles 
          */
         public static final int textTheme=0x7f040002;
         /**   custom text 

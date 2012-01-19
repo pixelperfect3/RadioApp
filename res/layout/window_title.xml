@@ -5,35 +5,24 @@
     android:layout_width="fill_parent"
     android:layout_height="50dip"
     android:gravity="center_vertical"
-    android:paddingLeft="5dip"
-    android:paddingBottom="5dip"
-    android:background="#566D7E">
+    android:background="#6495ed">
  
     <ImageView
         android:id="@+id/header"
         android:src="@drawable/icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
- 
- 	<LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:gravity="right|center_vertical"
-        android:paddingRight="5dip">
- 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20dip"
-            android:paddingRight="5dip" />
- 
-        <ImageView
-            android:id="@+id/viewIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
- 
-    </LinearLayout>
+ 	<RelativeLayout android:id="@+id/relativeLayout1" android:layout_width="wrap_content" android:layout_height="fill_parent" android:gravity="center_horizontal">
+ 		<TextView android:text="TextView" android:layout_width="wrap_content" android:textSize="20dip" 
+ 				android:layout_height="wrap_content" android:id="@+id/title" 
+ 				android:layout_alignParentLeft="true" android:layout_centerVertical="true" android:layout_marginLeft="5dip"
+ 				android:textStyle="bold"  android:textColor="@android:color/white"></TextView>
+ 		<ImageButton android:id="@+id/windowSearchButton" android:background="@android:drawable/ic_search_category_default" 
+ 				android:onClick="startSearch" android:layout_width="wrap_content" android:layout_height="wrap_content" 
+ 				android:layout_alignParentRight="true" android:layout_centerVertical="true" android:layout_marginRight="1dip"></ImageButton>
+ 		<ImageButton android:id="@+id/windowRefreshButton" android:background="@android:drawable/ic_popup_sync" 
+ 				android:onClick="refresh" android:layout_width="wrap_content" android:layout_height="wrap_content" 
+ 				android:layout_centerVertical="true" android:layout_toLeftOf="@+id/windowSearchButton" android:layout_marginRight="10dip"></ImageButton>
+ 	</RelativeLayout>
  
 </LinearLayout>
