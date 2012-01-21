@@ -21,6 +21,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -33,6 +34,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -64,6 +66,9 @@ import android.widget.Toast;
 		i.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, "audio/*");
 		startActivity(Intent.createChooser(i, "Search for " + mSong.getName()));
     
+    
+    	URL for android market: 
+    	https://market.android.com/search?q=lady+gaga+born+this+way&c=music
     **/
 
 
@@ -81,10 +86,17 @@ public class RadioApp extends Activity {
 	TextView _locationTV, _stationInfoTV;
 
 	// The Button
-	Button button;
+	Button _button;
 
+	// Checkbox for default city
+	CheckBox _defaultCityCheckbox;
+	
 	// Time
 	Time now;
+
+	// Shared Preferences (for default city)
+	public final String PREFERENCE_FILENAME = "RadioAppPreferences";
+	SharedPreferences _settings;
 	
 	/** Called when the activity is first created. */
 
@@ -108,17 +120,12 @@ public class RadioApp extends Activity {
         TextView title = (TextView) findViewById(R.id.title);
         ImageView icon  = (ImageView) findViewById(R.id.windowSearchButton);
         title.setText("Stations");
-        //icon.setImageResource(R.drawable.icon);
+        icon.setImageResource(R.drawable.icon);
         
         
 		// To indicate it's busy
 		//RadioApp.this.setProgressBarIndeterminate(true);
 		//RadioApp.this.setProgressBarIndeterminateVisibility(true);
-		
-		//setProgressBarIndeterminateVisibility(true);
-		
-		// get the context
-		//this.context = getApplicationContext();
 		
 		// get the text views
 		this._stationInfoTV =(TextView)findViewById(R.id.text);
@@ -127,68 +134,43 @@ public class RadioApp extends Activity {
 		// get the city from the Bundle passed in
 		String city = getIntent().getExtras().getString("CITY_NAME");
 		if (city != null) {
-			_location = city;
+			_location = city.toUpperCase();
 			this._locationTV.setText(_location);
 		}
 		
 		// Check if internet connection is available
 		if (!isNetworkAvailable()) {
-			//showToast("No internet connection!");
+			showToast("No internet connection!", true);
 
 			// Create an alert dialog
-			showDialog("No Internet Connection! Enable WiFi or 3G");
+			//showDialog("No Internet Connection! Enable WiFi or 3G");
 			return;
 		}
 		
 		/** Setup the Spinner by populating it with the list of radio stations **/
 		// read the list of stations in an asynctask
 		AsyncTask<String, Void, String[]> readStationsTask = new ReadStationsTask(this).execute();
-		
-		try {
-			// get list of all the stations from the task
-			String[] stations = new String[1];
-			
-			stations = readStationsTask.get();
-			
-			if (stations != null) {
-				// set selected channel to the first one
-				this._selectedChannelName = stations[0];
-				
-				
-				// Populate the Spinner
-				Spinner s = (Spinner) findViewById(R.id.spinner1);
-				ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-						android.R.layout.simple_spinner_item, stations);
-				adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-				s.setAdapter(adapter);
-				// now set the Spinner to listen for changes
-				s.setOnItemSelectedListener(new MyOnItemSelectedListener());
-			}
-		} catch (Exception e) {
-			Log.e("Reading Stations", "Cannot execute AsyncTask");
-		}
 
 		// the Time object
 		now = new Time();
-
-		
 
 		// Try to read the JSON information and then update the TextView
 		//boolean update = updateCurrentSong(_selectedChannelName);
 		if (this._selectedChannelName != "") {
 			AsyncTask readTask = new ReadSongTask(this).execute(_selectedChannelName);//updateCurrentSong(_selectedChannelName);
-	
-			try {
-				// if can't update, make toast saying there was an error with reading
-				if ( (!(Boolean)readTask.get()) ) { //(!update) {
-					CharSequence text = "Error reading information";
-					showToast(text, true);
-				}
-			} catch (Exception e) {
-				
-			}
 		}
 		
+		// Show if it's the default city or not
+		_settings = getSharedPreferences(this.PREFERENCE_FILENAME, MODE_PRIVATE);
+		_defaultCityCheckbox = (CheckBox)findViewById(R.id.defaultCheckbox);
+		
+		if (_settings.contains("DEFAULT")) { 	// Default City Stored
+		    	String defaultCity = _settings.getString("DEFAULT", "");
+		    	// if city is the same as the default city, set it to checked
+		    	if (city.equalsIgnoreCase(defaultCity)) 
+		    		_defaultCityCheckbox.setChecked(true);
+		}
+		 
 		//RadioApp.this.setProgressBarIndeterminate(false);
 		//RadioApp.this.setProgressBarIndeterminateVisibility(false);
 
@@ -211,10 +193,10 @@ public class RadioApp extends Activity {
 
 		try {
 			// if can't update, make toast saying there was an error with reading
-			if ( (!(Boolean)readTask.get()) ) { //(!update) {
+			/*if ( (!(Boolean)readTask.get()) ) { //(!update) {
 				CharSequence text = "Error reading information";
 				showToast(text, true);
-			}
+			}*/
 		} catch (Exception e) {
 			
 		}
@@ -225,6 +207,19 @@ public class RadioApp extends Activity {
 		}*/
 	}
 
+	/** Updates the default city via the check box **/
+	public void setDefaultCity(View view) {
+		SharedPreferences.Editor prefEditor = _settings.edit();
+		
+		if (this._defaultCityCheckbox.isChecked()) { // set the default city to the current one	
+        	prefEditor.putString("DEFAULT", this._location.toUpperCase());
+        	prefEditor.commit();
+		}
+		else { // remove it as default
+			prefEditor.remove("DEFAULT");
+		}
+	}
+	
 	/** Updates the current song on the selected channel **/
 	private boolean updateCurrentSong(String channelName) {
 		// Read all the JSON information
@@ -355,7 +350,7 @@ public class RadioApp extends Activity {
 		toast.show();
 	}
 
-	// Creates an alert dialog
+	/** Creates an alert dialog **/
 	private void showDialog(CharSequence text) {
 		// build a dialog
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -515,6 +510,31 @@ public class RadioApp extends Activity {
 			_stationInfoTV.setText("Name: " + _selectedChannelName + "\nArtist: " + _currentArtist + "\nSong: " + _currentSong + "\nTime: " + time);
 			RadioApp.this.setProgressBarIndeterminate(false);
 			RadioApp.this.setProgressBarIndeterminateVisibility(false);*/
+			
+			try {
+				// get list of all the stations from the task
+				String[] stations = new String[1];
+				
+				// get() causes a block on the UI Thread!
+				stations = this.get();
+				
+				if (stations != null) {
+					// set selected channel to the first one
+					RadioApp.this._selectedChannelName = stations[0];
+					
+					
+					// Populate the Spinner
+					Spinner s = (Spinner) findViewById(R.id.citySpinner);
+					ArrayAdapter<String> adapter = new ArrayAdapter<String>(RadioApp.this,
+							android.R.layout.simple_spinner_item, stations);
+					adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+					s.setAdapter(adapter);
+					// now set the Spinner to listen for changes
+					s.setOnItemSelectedListener(new MyOnItemSelectedListener());
+				}
+			} catch (Exception e) {
+				Log.e("Reading Stations", "Cannot execute AsyncTask");
+			}
 		}
 
 		@Override

@@ -50,7 +50,7 @@ public class MainActivity extends Activity {
 	private String _defaultCity = "";
 	
 	// GPS
-	//private LocationManager myLocationManager;
+	private LocationManager locationManager;
 	//private LocationListener myLocationListener;
 	private double _latitude, _longitude;
 	
@@ -68,8 +68,6 @@ public class MainActivity extends Activity {
 		// Change to main layout
         setContentView(R.layout.main);
         
-        
-        
         // Retrieve search textbox
         _searchText = (EditText) findViewById(R.id.searchBox);
         
@@ -85,29 +83,24 @@ public class MainActivity extends Activity {
         _searchText.setOnEditorActionListener(exampleListener);
         
         // Get last known location
-        String locationProvider = LocationManager.NETWORK_PROVIDER;
+       
         // Or use LocationManager.GPS_PROVIDER
 
         // Store latitude and longitude
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
-        try {
-        	_latitude = lastKnownLocation.getLatitude();
-        	_longitude = lastKnownLocation.getLongitude();
-        	Log.v("GPS", "Latitude: " + _latitude + ", Longitude: " + _longitude);
-        } catch (Exception e) {
-        	Log.e("GPS", "Could not get lat/lon of location");
-        	
-        }
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+       
         
         /** Check Shared preferences - if there is a default city already stored, just show the stations for that **/
         SharedPreferences settings = getSharedPreferences(this.PREFERENCE_FILENAME, MODE_PRIVATE);
        
-        
         if (settings.contains("DEFAULT")) { 	// Default City Stored
         	String defaultCity = settings.getString("DEFAULT", "");
         	// start activity with that city
         	search(defaultCity);
+        	
+        	// TEMPORARY TODO: Remove it
+        	SharedPreferences.Editor prefEditor = settings.edit();
+        	prefEditor.remove("DEFAULT");
         }
         else { // TEMPORARY TODO: Store Gainesville as default city
         	// WORKS! Commented out for now
@@ -140,6 +133,18 @@ public class MainActivity extends Activity {
 		/*****
 		 * TEMPORARY: Convert Latitude/Longitude to city
 		 */
+		// get the latitude/longitude
+		String locationProvider = LocationManager.NETWORK_PROVIDER;
+		Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
+	    try {
+	       	_latitude = lastKnownLocation.getLatitude();
+	       	_longitude = lastKnownLocation.getLongitude();
+	       	Log.v("GPS", "Latitude: " + _latitude + ", Longitude: " + _longitude);
+	    } catch (Exception e) {
+	    	Log.e("GPS", "Could not get lat/lon of location");
+	        	
+	    }
+		
 		Geocoder gcd = new Geocoder(getBaseContext(), Locale.getDefault());
 		List<Address> addresses;
 		String locality = "";
