@@ -21,9 +21,11 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.format.Time;
@@ -46,6 +48,7 @@ import android.widget.Toast;
     -Prettier backgrounds
     -Just generally less ugly
     -Use star icons for favouriting
+    	http://stackoverflow.com/questions/3443588/how-to-get-favorites-star
     -Add arrows for moving forward/backward along radio stations
     -Maybe arrows for showing previously played songs? 
     
@@ -190,21 +193,6 @@ public class RadioApp extends Activity {
 
 		// Try to read the JSON information and then update the TextView
 		AsyncTask readTask = new ReadSongTask(this).execute(_selectedChannelName);//updateCurrentSong(_selectedChannelName);
-
-		try {
-			// if can't update, make toast saying there was an error with reading
-			/*if ( (!(Boolean)readTask.get()) ) { //(!update) {
-				CharSequence text = "Error reading information";
-				showToast(text, true);
-			}*/
-		} catch (Exception e) {
-			
-		}
-		// if can't update, make toast saying there was an error with reading
-		/*if ( ((String)readTask.get()) == null ) { //(!update) {
-			CharSequence text = "Error reading information";
-			showToast(text);
-		}*/
 	}
 
 	/** Updates the default city via the check box **/
@@ -341,6 +329,66 @@ public class RadioApp extends Activity {
 	}
 
 
+	/** Searches for the song through the Android Market **/
+	public void searchAndroidMarket(View view) {
+		// parse song first
+		StringBuilder s = new StringBuilder("https://market.android.com/search?q=");//lady+gaga+born+this+way&c=music");
+		s = convertSongInfo(s);
+		s.append("&c=music");
+		
+		// make sure it's valid
+		String url = s.toString();
+		if (url.length() == 0) {
+			showToast("No song currently selected", false);
+			return;
+		}
+		
+		// now open it
+		this.openURL(url.toString());
+	}
+	
+	/** Searches for the song through Amazon **/
+	public void searchAmazon(View view) {
+		// parse song first
+		StringBuilder s = new StringBuilder("http://www.amazon.com/s/url=search-alias=digital-music&field-keywords=");
+		s = convertSongInfo(s);
+		
+		// make sure it's valid
+		String url = s.toString();
+		if (url.length() == 0) {
+			showToast("No song currently selected", false);
+			return;
+		}
+		
+		// now open it
+		this.openURL(url.toString());
+	}
+	
+	/** Converts the song info into a useful URL format **/
+	// TODO: Do it once and store or do it all the time?
+	private StringBuilder convertSongInfo(StringBuilder s) {
+		String[] artist = this._currentArtist.split(" ");
+		String[] song = this._currentSong.split(" ");
+		
+		for (int i = 0; i < artist.length; i++)
+			if (i != artist.length - 1)
+				s.append(artist[i] + "+");
+			else
+				s.append(artist[i]);
+		
+		for (int i = 0; i < song.length; i++)
+			s.append("+" + song[i] );
+		
+		return s;
+	}
+	
+	/** Opens a URL Intent **/
+	private void openURL(String url) {
+		Intent i = new Intent(Intent.ACTION_VIEW, 
+	       		Uri.parse(url));
+			startActivity(i);
+	}
+	
 	/** Helper method for showing a Toast notification **/
 	private void showToast(CharSequence text, boolean timeShort) {
 		Context context = getApplicationContext();
@@ -405,7 +453,7 @@ public class RadioApp extends Activity {
 				// Try to read the JSON information and then update the TextView
 				AsyncTask readTask = new ReadSongTask(RadioApp.this).execute(_selectedChannelName);//updateCurrentSong(_selectedChannelName);
 
-				try {
+				/*try {
 					// if can't update, make toast saying there was an error with reading
 					if ( (!(Boolean)readTask.get()) ) { //(!update) {
 						CharSequence text = "Error reading information";
@@ -413,7 +461,7 @@ public class RadioApp extends Activity {
 					}
 				} catch (Exception e) {
 					
-				}
+				}*/
 			}
 
 
@@ -543,7 +591,7 @@ public class RadioApp extends Activity {
 			
 			// set the properties of the progressdialog
 			// make sure it's indeterminate
-			this.dialog.setMessage("Loading info");
+			this.dialog.setMessage("Loading station info");
 			this.dialog.setIndeterminate(true);
 	        this.dialog.show();
 		}
@@ -596,7 +644,7 @@ public class RadioApp extends Activity {
 			
 			// set the properties of the progressdialog
 			// make sure it's indeterminate
-			this.dialog.setMessage("Loading info");
+			this.dialog.setMessage("Loading station info");
 			this.dialog.setIndeterminate(true);
 	        this.dialog.show();
 		}
