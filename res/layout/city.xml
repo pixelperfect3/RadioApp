@@ -1,23 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     	android:layout_width="fill_parent"
-    	android:layout_height="fill_parent" android:orientation="vertical">
+    	android:layout_height="fill_parent" android:orientation="vertical"
+    	android:background="#FFFFFF">
     <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/relativeLayout2">
         <RelativeLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/relativeLayout1">
-            <TextView android:layout_margin="20dip" android:text="Location" android:textSize="25dp" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/location"></TextView>
-            <CheckBox android:paddingLeft="40px" android:layout_marginLeft="40dip" android:id="@+id/defaultCheckbox" android:typeface="normal" android:layout_alignTop="@+id/location" android:layout_height="wrap_content" android:text="Default?" android:layout_width="wrap_content" android:layout_toRightOf="@+id/location" android:textSize="18dip" android:onClick="setDefaultCity" android:layout_alignBottom="@+id/location"></CheckBox>
+            <TextView android:text="Location" android:textSize="25dp" android:textColor="@android:color/black" 
+            		  android:layout_height="wrap_content" android:id="@+id/location" android:layout_width="fill_parent" android:layout_marginLeft="20dip" android:layout_marginTop="15dip" android:layout_marginBottom="5dip"></TextView>
+            <CheckBox android:id="@+id/defaultCheckbox" android:textColor="@android:color/black" android:typeface="normal" android:layout_height="wrap_content" android:text="Default?" android:layout_width="wrap_content" android:onClick="setDefaultCity" android:layout_below="@+id/location" android:paddingLeft="40px" android:textSize="17dip" android:layout_alignLeft="@+id/location"></CheckBox>
         </RelativeLayout>
         <Spinner android:id="@+id/citySpinner" android:prompt="@string/station_selector" 
-        android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_below="@+id/relativeLayout1" android:layout_margin="20dip"></Spinner>
+        android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_below="@+id/relativeLayout1" android:layout_marginBottom="0dip" android:layout_marginLeft="20dip" android:layout_marginRight="20dip" android:layout_marginTop="10dip"></Spinner>
     </RelativeLayout>
-    <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/relativeLayout3">
-        <TextView android:layout_width="fill_parent" android:layout_margin="20dip" android:text="Station info" android:textSize="18dp" android:layout_height="wrap_content" android:id="@+id/text" android:paddingRight="50dip"></TextView>
-        <ToggleButton android:text="ToggleButton" android:id="@+id/toggleButton1" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_toRightOf="@+id/text" android:layout_alignTop="@+id/text" android:layout_alignBottom="@+id/text"></ToggleButton>
-        <RelativeLayout android:layout_below="@+id/text" android:layout_width="wrap_content" android:id="@+id/relativeLayout4" android:layout_alignLeft="@+id/text" android:layout_alignRight="@+id/text" android:layout_height="wrap_content">
-            <ImageButton android:layout_height="wrap_content" android:id="@+id/amazonButton" android:layout_width="wrap_content" android:background="@drawable/amazon_small" android:onClick="searchAmazon"></ImageButton>
-            <ImageButton android:layout_height="wrap_content" android:id="@+id/gsButton" android:layout_width="wrap_content" android:background="@drawable/grooveshark_small" android:layout_toRightOf="@+id/amazonButton" 
-            android:layout_alignTop="@+id/amazonButton" android:layout_marginLeft="20dip"></ImageButton>
-            <ImageButton android:layout_height="wrap_content" android:id="@+id/googleButton" android:layout_width="wrap_content" android:background="@drawable/ic_marketplace" android:layout_toRightOf="@+id/gsButton" android:layout_marginLeft="20dip" android:onClick="searchAndroidMarket"></ImageButton>
+    <ScrollView android:id="@+id/scrollView1" android:layout_height="wrap_content" android:layout_width="wrap_content">
+        <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/relativeLayout3">
+            <TextView android:text="Station info" android:textSize="18dp" android:textColor="@android:color/black"
+            		  android:layout_height="wrap_content" android:paddingRight="50dip" android:layout_marginBottom="5dip" android:layout_marginTop="20dip" android:id="@+id/_stationInfoTV" android:layout_alignParentLeft="true" android:layout_marginLeft="20dip" android:layout_width="wrap_content"></TextView>
+            <CheckBox android:layout_height="wrap_content" android:text="" android:textColor="@android:color/black"
+            		  android:layout_width="wrap_content" android:layout_toRightOf="@+id/_stationInfoTV" android:layout_alignTop="@+id/_stationInfoTV" android:id="@+id/_favouriteCheckbox" android:layout_marginLeft="20dip"></CheckBox>
+            <TextView android:text="Artist:" android:textSize="17dp" android:textColor="@android:color/black"
+            		  android:layout_height="wrap_content" android:layout_below="@+id/_stationInfoTV" android:layout_alignLeft="@+id/_stationInfoTV" 
+            		  android:id="@+id/_currentArtistTV" android:layout_marginBottom="10dip" android:layout_width="wrap_content"></TextView>
+            <TextView android:text="Song:" android:textSize="17dp" android:textColor="@android:color/black"
+            		  android:layout_height="wrap_content" android:id="@+id/_currentSongTV" android:layout_below="@+id/_currentArtistTV" android:layout_alignLeft="@+id/_currentArtistTV" android:layout_marginBottom="10dip" android:layout_width="wrap_content"></TextView>
+            <RelativeLayout android:layout_height="wrap_content" android:id="@+id/relativeLayout4" android:layout_alignLeft="@+id/_currentSongTV" android:layout_below="@+id/_currentSongTV" android:layout_marginBottom="10dip" android:layout_width="fill_parent">
+                <ImageButton android:layout_height="wrap_content" android:id="@+id/amazonButton" android:layout_width="wrap_content" android:background="@drawable/amazon_small" android:onClick="searchAmazon"></ImageButton>
+                <ImageButton android:layout_alignTop="@+id/amazonButton" android:layout_height="wrap_content" android:id="@+id/gsButton" android:layout_width="wrap_content" android:layout_toRightOf="@+id/amazonButton" android:background="@drawable/grooveshark_small" android:layout_marginLeft="20dip"></ImageButton>
+                <ImageButton android:layout_height="wrap_content" android:id="@+id/googleButton" android:layout_width="wrap_content" android:layout_toRightOf="@+id/gsButton" android:background="@drawable/ic_marketplace" android:onClick="searchAndroidMarket" android:layout_marginLeft="20dip"></ImageButton>
+            </RelativeLayout>
         </RelativeLayout>
-    </RelativeLayout>
+    </ScrollView>
 </LinearLayout>

@@ -35,7 +35,6 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -80,16 +79,13 @@ public class RadioApp extends Activity {
 	Context context;
 	
 	// Strings for location, name, artist, song
-	private String _location = "gainesville";
-	private String _selectedChannelName = ""; // 105.3 Gainesville at first - WYKS
+	private String _location = "";
+	private String _selectedChannelName = ""; 
 	private String _currentArtist = ""; 
 	private String _currentSong = "";
 
-	// The TextView
-	TextView _locationTV, _stationInfoTV;
-
-	// The Button
-	Button _button;
+	// The TextViews
+	TextView _locationTV, _stationInfoTV, _currentArtistTV, _currentSongTV;
 
 	// Checkbox for default city
 	CheckBox _defaultCityCheckbox;
@@ -131,7 +127,9 @@ public class RadioApp extends Activity {
 		//RadioApp.this.setProgressBarIndeterminateVisibility(true);
 		
 		// get the text views
-		this._stationInfoTV =(TextView)findViewById(R.id.text);
+		this._stationInfoTV =(TextView)findViewById(R.id._stationInfoTV);
+		this._currentArtistTV =(TextView)findViewById(R.id._currentArtistTV);
+		this._currentSongTV =(TextView)findViewById(R.id._currentSongTV);
 		this._locationTV = (TextView)findViewById(R.id.location);
 
 		// get the city from the Bundle passed in
@@ -160,7 +158,7 @@ public class RadioApp extends Activity {
 		// Try to read the JSON information and then update the TextView
 		//boolean update = updateCurrentSong(_selectedChannelName);
 		if (this._selectedChannelName != "") {
-			AsyncTask readTask = new ReadSongTask(this).execute(_selectedChannelName);//updateCurrentSong(_selectedChannelName);
+			AsyncTask<String, Void, Boolean> readTask = new ReadSongTask(this).execute(_selectedChannelName);//updateCurrentSong(_selectedChannelName);
 		}
 		
 		// Show if it's the default city or not
@@ -221,7 +219,7 @@ public class RadioApp extends Activity {
 			JSONObject firstJson = jsonArray.getJSONObject(0);
 
 			// Channel name
-			String name = firstJson.getString("name");
+			//String name = firstJson.getString("name");
 
 			// get the rest of the info
 			// for ex., the current song
@@ -270,6 +268,7 @@ public class RadioApp extends Activity {
 			e.printStackTrace();
 			Log.e(RadioApp.class.getName(), "ERROR!!!: " + e.toString());
 			//t.setText("Exception " + e.toString());
+			showToast("Error reading song info", false);
 		}
 
 		return false;
@@ -327,7 +326,6 @@ public class RadioApp extends Activity {
 		}
 		return builder.toString();
 	}
-
 
 	/** Searches for the song through the Android Market **/
 	public void searchAndroidMarket(View view) {
@@ -448,28 +446,15 @@ public class RadioApp extends Activity {
 				// same channel, so no need to update
 				return;
 			} else {
-				// update
-				_selectedChannelName = name;
 				// Try to read the JSON information and then update the TextView
-				AsyncTask readTask = new ReadSongTask(RadioApp.this).execute(_selectedChannelName);//updateCurrentSong(_selectedChannelName);
-
-				/*try {
-					// if can't update, make toast saying there was an error with reading
-					if ( (!(Boolean)readTask.get()) ) { //(!update) {
-						CharSequence text = "Error reading information";
-						showToast(text, true);
-					}
-				} catch (Exception e) {
-					
-				}*/
+				_selectedChannelName = name;
+				
+				@SuppressWarnings("unused")
+				AsyncTask<String, Void, Boolean> readTask = new ReadSongTask(RadioApp.this).execute(_selectedChannelName);//updateCurrentSong(_selectedChannelName);
 			}
-
-
-			// Toast.makeText(parent.getContext(), "The planet is " +
-			// parent.getItemAtPosition(pos).toString(), Toast.LENGTH_LONG).show();
 		}
 
-		public void onNothingSelected(AdapterView parent) {
+		public void onNothingSelected(AdapterView<?> parent) {
 			// Do nothing.
 		}
 	}
@@ -633,7 +618,10 @@ public class RadioApp extends Activity {
 			// dismiss the dialog
 			dialog.dismiss();
 			String time = now.format("%H:%M");
-			_stationInfoTV.setText("Name: " + _selectedChannelName + "\nArtist: " + _currentArtist + "\nSong: " + _currentSong + "\nTime: " + time);
+			_stationInfoTV.setText("Station: " + _selectedChannelName 
+					+ "\n\tTime: " + time);
+			_currentArtistTV.setText("Artist:\n\t" + _currentArtist);
+			_currentSongTV.setText("Song:\n\t" + _currentSong);
 			RadioApp.this.setProgressBarIndeterminate(false);
 			RadioApp.this.setProgressBarIndeterminateVisibility(false);
 		}
