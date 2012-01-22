@@ -1,3 +1,23 @@
+/** This is the starting activity for the app.
+ *  It shows a textbox where the user can search by name, zipcode, etc. There is also a button for just using the
+ *  current location.
+ *  
+ *  If the default location is set, it will directly go to the second activity.
+ *  
+ *  It also shows the favourite stations/songs of the user.
+ *  
+ *  TODO:
+ 	-Look up default city - if not there, then show this screen, 							 	[DONE]
+ 	  otherwise move to the second screen. 
+    -Custom background
+	-Have main app name with search box (should lead to different activity) 					[DONE]
+	-Show favourite stations (cities?)
+    -Allow location by GPS 																		[PARTIALLY DONE]
+    -Add autocomplete option (by cities)
+    -Add ImageButtons for search (the magnifying glass and the location icon from Google Maps) 	[DONE!]
+ 	 	-Add onfocus, onclick images
+ */
+
 package radio.app;
 
 import java.io.IOException;
@@ -27,17 +47,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/** TODO:
- 	-Look up default city - if not there, then show this screen, otherwise move to the second screen. (PARTIALLY DONE)
-    -Custom background
-    -Have main app name with search box (should lead to different activity)
-    -Show favourite stations (cities?)
-    -Allow location by GPS (kinda working - get's location)
-    -Add autocomplete option (by cities)
-    -Add ImageButtons for search (the magnifying glass and the location icon from Google Maps)
- 	 	-Add onfocus, onclick images
- **/
-
 
 public class MainActivity extends Activity {
 	/** PROPERTIES **/
@@ -46,7 +55,7 @@ public class MainActivity extends Activity {
 	EditText _searchText;
 	
 	// Shared preferences name
-	public final String PREFERENCE_FILENAME = "RadioAppPreferences";
+	public static final String PREFERENCE_FILENAME = "RadioAppPreferences";
 	private String _defaultCity = "";
 	
 	// GPS

@@ -1,3 +1,39 @@
+/** This class is the second activity of the app and does the heavy lifting.
+ *  It loads all the stations for a city and allows the user to see what they are currently playing
+ *  
+ *  @author shayan javed (shayanj@gmail.com)
+ *  TODO:
+ *  -Add search functionality (android search button and window button)
+    -Customize the Spinner
+    -Prettier backgrounds
+    -Just generally less ugly
+    -Use star icons for favouriting
+    	http://stackoverflow.com/questions/3443588/how-to-get-favorites-star
+    -Add arrows for moving forward/backward along radio stations
+    -Maybe arrows for showing previously played songs? 
+    
+    -For songs, show options to explore in Amazon/google Music, etc. To open a link, here's an example: [DONE for the most part]
+    	Intent i = new Intent(Intent.ACTION_VIEW, 
+       		Uri.parse("http://www.amazon.com/s/url=search-alias=digital-music&field-keywords=lady+gaga+born+this+way"));
+		startActivity(i);
+    
+      OR:
+      
+      	Intent i = new Intent();
+	  	i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		i.setAction(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
+		i.putExtra(SearchManager.QUERY, mSong.getArtits() + " " + mSong.getName());
+		i.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, "artist");
+		i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "album");
+		i.putExtra(MediaStore.EXTRA_MEDIA_TITLE, mSong.getName());
+		i.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, "audio/*");
+		startActivity(Intent.createChooser(i, "Search for " + mSong.getName()));
+    
+    
+    	URL for android market: 
+    	https://market.android.com/search?q=lady+gaga+born+this+way&c=music
+ */
+
 package radio.app;
 
 import java.io.BufferedReader;
@@ -41,36 +77,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/** TODO:
-    -Customize the Spinner
-    -Customize the Button (so they don't look so ugly)
-    -Prettier backgrounds
-    -Just generally less ugly
-    -Use star icons for favouriting
-    	http://stackoverflow.com/questions/3443588/how-to-get-favorites-star
-    -Add arrows for moving forward/backward along radio stations
-    -Maybe arrows for showing previously played songs? 
-    
-    -For songs, show options to explore in Amazon/google Music, etc. To open a link, here's an example:
-    	Intent i = new Intent(Intent.ACTION_VIEW, 
-       		Uri.parse("http://www.amazon.com/s/url=search-alias=digital-music&field-keywords=lady+gaga+born+this+way"));
-		startActivity(i);
-    
-      OR:
-      
-      	Intent i = new Intent();
-	  	i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		i.setAction(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
-		i.putExtra(SearchManager.QUERY, mSong.getArtits() + " " + mSong.getName());
-		i.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, "artist");
-		i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "album");
-		i.putExtra(MediaStore.EXTRA_MEDIA_TITLE, mSong.getName());
-		i.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, "audio/*");
-		startActivity(Intent.createChooser(i, "Search for " + mSong.getName()));
-    
-    
-    	URL for android market: 
-    	https://market.android.com/search?q=lady+gaga+born+this+way&c=music
+/** 
     **/
 
 
@@ -117,9 +124,9 @@ public class RadioApp extends Activity {
 		
         // set the custom texview and icon
         TextView title = (TextView) findViewById(R.id.title);
-        ImageView icon  = (ImageView) findViewById(R.id.windowSearchButton);
+        //ImageView icon  = (ImageView) findViewById(R.id.windowSearchButton);
         title.setText("Stations");
-        icon.setImageResource(R.drawable.icon);
+        //icon.setImageResource(R.drawable.icon);
         
         
 		// To indicate it's busy
@@ -162,7 +169,7 @@ public class RadioApp extends Activity {
 		}
 		
 		// Show if it's the default city or not
-		_settings = getSharedPreferences(this.PREFERENCE_FILENAME, MODE_PRIVATE);
+		_settings = getSharedPreferences(MainActivity.PREFERENCE_FILENAME, MODE_PRIVATE);
 		_defaultCityCheckbox = (CheckBox)findViewById(R.id.defaultCheckbox);
 		
 		if (_settings.contains("DEFAULT")) { 	// Default City Stored
@@ -203,6 +210,7 @@ public class RadioApp extends Activity {
 		}
 		else { // remove it as default
 			prefEditor.remove("DEFAULT");
+			prefEditor.commit();
 		}
 	}
 	
@@ -349,6 +357,40 @@ public class RadioApp extends Activity {
 	public void searchAmazon(View view) {
 		// parse song first
 		StringBuilder s = new StringBuilder("http://www.amazon.com/s/url=search-alias=digital-music&field-keywords=");
+		s = convertSongInfo(s);
+		
+		// make sure it's valid
+		String url = s.toString();
+		if (url.length() == 0) {
+			showToast("No song currently selected", false);
+			return;
+		}
+		
+		// now open it
+		this.openURL(url.toString());
+	}
+	
+	/** Searches for the song through Amazon **/
+	public void searchGrooveshark(View view) {
+		// parse song first
+		StringBuilder s = new StringBuilder("http://grooveshark.com/#!/search?q=");
+		s = convertSongInfo(s);
+		
+		// make sure it's valid
+		String url = s.toString();
+		if (url.length() == 0) {
+			showToast("No song currently selected", false);
+			return;
+		}
+		
+		// now open it
+		this.openURL(url.toString());
+	}
+		
+	/** Searches for the song on Youtube **/
+	public void searchYoutube(View view) {
+		// parse song first
+		StringBuilder s = new StringBuilder("http://m.youtube.com/results?search_query=");
 		s = convertSongInfo(s);
 		
 		// make sure it's valid
@@ -576,7 +618,7 @@ public class RadioApp extends Activity {
 			
 			// set the properties of the progressdialog
 			// make sure it's indeterminate
-			this.dialog.setMessage("Loading station info");
+			this.dialog.setMessage("Loading list of stations");
 			this.dialog.setIndeterminate(true);
 	        this.dialog.show();
 		}
