@@ -1,4 +1,12 @@
-This app provides a simple and easy way to look at what is being played on a public radio station.
+This Android app provides a simple and easy way to look at what is being played on a public radio station.
+
+Allows user to search by city, zipcode, network location. Can also set default city so do not have to search every time.
+
+Can also save radio stations as favorites
+
+January 24th:
+-------------
+Can save favorites. 
 
 January 11th:
 -------------
