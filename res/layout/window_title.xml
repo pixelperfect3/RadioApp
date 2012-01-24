@@ -1,29 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:layout_width="fill_parent"
-    android:layout_height="40dip"
-    android:gravity="center_vertical"
-    android:background="#6495ed">
- 
-    <ImageView
-        android:id="@+id/header"
-        android:src="@drawable/icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
- 	<RelativeLayout android:id="@+id/relativeLayout1" android:layout_width="wrap_content" android:layout_height="fill_parent" android:gravity="center_horizontal">
- 		<TextView android:text="TextView" android:layout_width="wrap_content" android:textSize="15dip" 
- 				android:layout_height="wrap_content" android:id="@+id/title" 
- 				android:layout_alignParentLeft="true" android:layout_centerVertical="true" android:layout_marginLeft="5dip"
- 				android:textStyle="bold"  android:textColor="@android:color/white"></TextView>
- 		<ImageButton android:id="@+id/windowSearchButton" android:onClick="startSearch" android:layout_width="wrap_content" android:layout_height="wrap_content" 
- 				android:scaleType="fitCenter"
- 				android:layout_alignParentRight="true" android:layout_centerVertical="true" android:layout_marginRight="1dip" android:background="@drawable/search_title"></ImageButton>
- 		<ImageButton android:id="@+id/windowRefreshButton" android:background="@android:drawable/ic_popup_sync" 
- 				android:onClick="refresh" android:layout_width="wrap_content" android:layout_centerVertical="true" 
- 				android:scaleType="fitCenter"
- 				android:layout_toLeftOf="@+id/windowSearchButton" android:layout_marginRight="10dip" android:layout_height="wrap_content"></ImageButton>
- 	</RelativeLayout>
- 
+<!--  Defines the custom title for the RadioApp activity -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="horizontal" android:layout_width="fill_parent"
+	android:layout_height="40dip" android:gravity="center_vertical"
+	android:background="#6495ed">
+
+	<ImageView android:id="@+id/header" android:src="@drawable/icon"
+		android:layout_width="wrap_content" android:layout_height="wrap_content" />
+	<RelativeLayout android:id="@+id/relativeLayout1"
+		android:layout_width="wrap_content" android:layout_height="fill_parent"
+		android:gravity="center_horizontal">
+		<TextView android:text="TextView" android:layout_width="wrap_content"
+			android:textSize="15dip" android:layout_height="wrap_content"
+			android:id="@+id/title" android:layout_alignParentLeft="true"
+			android:layout_centerVertical="true" android:layout_marginLeft="5dip"
+			android:textStyle="bold" android:textColor="@android:color/white" />
+		<ImageButton android:id="@+id/windowRefreshButton"
+			android:background="@android:drawable/ic_popup_sync" android:onClick="refresh"
+			android:layout_width="wrap_content" android:layout_centerVertical="true"
+			android:scaleType="fitCenter" android:layout_toLeftOf="@+id/windowSearchButton"
+			android:layout_marginRight="10dip" android:layout_height="wrap_content" />
+		<ImageButton android:layout_width="wrap_content"
+			android:layout_centerVertical="true" android:id="@+id/windowSearchButton"
+			android:background="@drawable/search_title" android:onClick="startSearch"
+			android:layout_marginRight="1dip" android:layout_alignParentRight="true"
+			android:layout_height="fill_parent" />
+	</RelativeLayout>
+
 </LinearLayout>
