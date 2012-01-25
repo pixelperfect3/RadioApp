@@ -3,12 +3,15 @@
  *  
  *  @author shayan javed (shayanj@gmail.com)
  *  TODO:
- *  -Add search functionality (android search button and window button)
+    -Change this class so that it only shows a ListView of stations (can favorite/unfavorite from here).
+      then once user selects a station open up a different activity for the station. (look at google reader for example)
+    -Add search functionality (android search button and window button)
     -Customize the Spinner
     -Prettier backgrounds
     -Just generally less ugly
-    -Use star icons for favouriting
+    -Use star icons for favouriting							[Functionality DONE]
     	http://stackoverflow.com/questions/3443588/how-to-get-favorites-star
+    	* Add Toast notification once favorited
     -Add arrows for moving forward/backward along radio stations
     -Maybe arrows for showing previously played songs? 
     
@@ -171,11 +174,13 @@ public class RadioApp extends Activity {
 		AsyncTask<String, Void, String[]> readStationsTask = new ReadStationsTask(
 				this).execute();
 
+		Log.v("CHANNELS LOADED:", this._selectedChannelName);
 		// the Time object
 		now = new Time();
 
 		// Try to read the JSON information and then update the TextView
 		// boolean update = updateCurrentSong(_selectedChannelName);
+		Log.e("SELECTED CHANNEL2:", this._selectedChannelName);
 		if (this._selectedChannelName != "") {
 			AsyncTask<String, Void, Boolean> readTask = new ReadSongTask(this)
 					.execute(_selectedChannelName);// updateCurrentSong(_selectedChannelName);
@@ -247,11 +252,15 @@ public class RadioApp extends Activity {
 	private boolean updateCurrentSong(String channelName) {
 		// Read all the JSON information
 		// Need to add the "[" and "]" so that it can be properly parsed
-		String readJSONFeed = "[" + readJSON(channelName, true) + "]";
+		String handle = new Scanner(channelName).next();
+		String readJSONFeed = "[" + readJSON(handle, true) + "]";
 
 		try {
 			// convert it to a json array
 			JSONArray jsonArray = new JSONArray(readJSONFeed);
+			if (jsonArray.length() < 1) // nothing read
+				return false;
+			
 			// get the first object which has all the info
 			JSONObject firstJson = jsonArray.getJSONObject(0);
 
@@ -278,7 +287,7 @@ public class RadioApp extends Activity {
 			e.printStackTrace();
 			Log.e(RadioApp.class.getName(), "ERROR!!!: " + e.toString());
 			// t.setText("Exception " + e.toString());
-			showToast("Error reading song info", false);
+			//showToast("Error reading song info", false);
 		}
 
 		return false;
@@ -495,24 +504,25 @@ public class RadioApp extends Activity {
 		public void onItemSelected(AdapterView<?> parent, View view, int pos,
 				long id) {
 			// Get the selected station
-			String station = parent.getItemAtPosition(pos).toString();
+			//String station = parent.getItemAtPosition(pos).toString();
 
+			//Log.v("SELECTED STATION!!:", station);
 			// Extract the 4-letter name
-			Scanner scan = new Scanner(station);
-			String name = scan.next();
+			//Scanner scan = new Scanner(station);
+			//String name = station;//scan.next();
 
 			// Try to update the song if possible
-			if (name.equals(_selectedChannelName)) {
+			/*if (name.equals(_selectedChannelName)) {
 				// same channel, so no need to update
 				return;
-			} else {
+			} else {*/
 				// Try to read the JSON information and then update the TextView
-				_selectedChannelName = name;
+			_selectedChannelName = parent.getItemAtPosition(pos).toString();
 
-				@SuppressWarnings("unused")
-				AsyncTask<String, Void, Boolean> readTask = new ReadSongTask(
-						RadioApp.this).execute(_selectedChannelName);// updateCurrentSong(_selectedChannelName);
-			}
+			@SuppressWarnings("unused")
+			AsyncTask<String, Void, Boolean> readTask = new ReadSongTask(
+					RadioApp.this).execute(_selectedChannelName);// updateCurrentSong(_selectedChannelName);
+			
 		}
 
 		public void onNothingSelected(AdapterView<?> parent) {
@@ -622,7 +632,8 @@ public class RadioApp extends Activity {
 				if (stations != null) {
 					// set selected channel to the first one
 					RadioApp.this._selectedChannelName = stations[0];
-
+					Log.v("SELECTED CHANNEL:", RadioApp.this._selectedChannelName);
+					
 					// Populate the Spinner
 					Spinner s = (Spinner) findViewById(R.id._citySpinner);
 					ArrayAdapter<String> adapter = new ArrayAdapter<String>(

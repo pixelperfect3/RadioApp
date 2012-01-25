@@ -7,13 +7,16 @@
  *  It also shows the favourite stations/songs of the user.
  *  
  *  TODO:
+ *  -Create custom ListView/ListAdapter (use in both this and RadioApp.java)
+ *  -Show favourite stations (cities?)
+ *  	* Should be able to click on station to open up StationView.java or something
+ 	-Add autocomplete option (by cities)
+ 	-Custom background
  	-Look up default city - if not there, then show this screen, 							 	[DONE]
  	  otherwise move to the second screen. 
-    -Custom background
 	-Have main app name with search box (should lead to different activity) 					[DONE]
-	-Show favourite stations (cities?)
     -Allow location by GPS 																		[PARTIALLY DONE]
-    -Add autocomplete option (by cities)
+    
     -Add ImageButtons for search (the magnifying glass and the location icon from Google Maps) 	[DONE!]
  	 	-Add onfocus, onclick images
  */
@@ -42,26 +45,27 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
+	
 	/** PROPERTIES **/
-
-	// Search text box
-	EditText _searchText;
-
-	// Shared preferences name
-	public static final String PREFERENCE_FILENAME = "RadioAppPreferences";
-	private String _defaultCity = "";
-
+	private EditText _searchText;  // Search text box
+	public static final String PREFERENCE_FILENAME = "RadioAppPreferences"; // Shared preferences name
+	private ListView _favoritesLV; // ListView for showing favorites
+	private FavoritesDataSource _dataSource; // Database for storing favorites
 	// GPS
 	private LocationManager locationManager;
-	// private LocationListener myLocationListener;
 	private double _latitude, _longitude;
-
+	
+	
+	/** METHODS **/
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -76,11 +80,12 @@ public class MainActivity extends Activity {
 		// Change to main layout
 		setContentView(R.layout.main);
 
-		// Retrieve search textbox
-		_searchText = (EditText) findViewById(R.id.searchBox);
+		// Retrieve widgets
+		_searchText  = (EditText) findViewById(R.id.searchBox); // search box
+		_favoritesLV = (ListView) findViewById(R.id.favoritesLV); // favorites
 
-		// Set the listener for the Search Textbox - on pressing enter should
-		// start a search
+		// Set the listener for the Search Textbox - 
+		// on pressing enter should start a search
 		TextView.OnEditorActionListener exampleListener = new TextView.OnEditorActionListener() {
 			public boolean onEditorAction(TextView exampleView, int actionId,
 					KeyEvent event) {
@@ -93,11 +98,7 @@ public class MainActivity extends Activity {
 		};
 		_searchText.setOnEditorActionListener(exampleListener);
 
-		// Get last known location
-
-		// Or use LocationManager.GPS_PROVIDER
-
-		// Store latitude and longitude
+		// Location Manager for getting latitude/longitude
 		locationManager = (LocationManager) this
 				.getSystemService(Context.LOCATION_SERVICE);
 
@@ -113,22 +114,30 @@ public class MainActivity extends Activity {
 			// start activity with that city
 			search(defaultCity);
 
-			// TEMPORARY TODO: Remove it
-			SharedPreferences.Editor prefEditor = settings.edit();
-			prefEditor.remove("DEFAULT");
-		} else { // TEMPORARY TODO: Store Gainesville as default city
-					// WORKS! Commented out for now
-			SharedPreferences.Editor prefEditor = settings.edit();
-			prefEditor.remove("DEFAULT");
-			/*
-			 * prefEditor.putString("DEFAULT", "Gainesville");
-			 * prefEditor.commit();
-			 */
 		}
 
-		// End of OnCreate
-	}
+		/** Open the favorites database **/
+		_dataSource = new FavoritesDataSource(this);
+		_dataSource.open();
+		
+		// Show the favorites
+		updateFavorites();
+		
+	} // End of OnCreate
 
+	/** Updates the favorites list **/
+	// TODO: Should also be called on onResume()?
+	private void updateFavorites() {
+		// get all the favorites
+		List<Favorite> values = _dataSource.getAllFavorites();
+
+		// Use the SimpleCursorAdapter to show the
+		// elements in a ListView
+		ArrayAdapter<Favorite> adapter = new ArrayAdapter<Favorite>(this,
+				android.R.layout.simple_list_item_1, values);
+		_favoritesLV.setAdapter(adapter);
+	}
+	
 	/** Method called when search button is pressed **/
 	public void startSearch(View v) {
 		// read text to search
