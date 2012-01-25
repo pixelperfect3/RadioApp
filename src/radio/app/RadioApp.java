@@ -180,11 +180,11 @@ public class RadioApp extends Activity {
 
 		// Try to read the JSON information and then update the TextView
 		// boolean update = updateCurrentSong(_selectedChannelName);
-		Log.e("SELECTED CHANNEL2:", this._selectedChannelName);
+		/*Log.e("SELECTED CHANNEL2:", this._selectedChannelName);
 		if (this._selectedChannelName != "") {
 			AsyncTask<String, Void, Boolean> readTask = new ReadSongTask(this)
 					.execute(_selectedChannelName);// updateCurrentSong(_selectedChannelName);
-		}
+		}*/
 
 		// Show if it's the default city or not
 		_settings = getSharedPreferences(MainActivity.PREFERENCE_FILENAME,
@@ -198,8 +198,6 @@ public class RadioApp extends Activity {
 				_defaultCityCheckbox.setChecked(true);
 		}
 
-		
-		
 		// RadioApp.this.setProgressBarIndeterminate(false);
 		// RadioApp.this.setProgressBarIndeterminateVisibility(false);
 
