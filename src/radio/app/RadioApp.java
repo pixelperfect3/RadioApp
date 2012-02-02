@@ -1,5 +1,11 @@
-/** This class is the second activity of the app and does the heavy lifting.
+/** 
+ *  NOTE: THIS CLASS IS BEING PHASED OUT
+ *   
+ *  This class is the second activity of the app and does the heavy lifting.
+ *
  *  It loads all the stations for a city and allows the user to see what they are currently playing
+ *  
+ *  
  *  
  *  @author shayan javed (shayanj@gmail.com)
  *  TODO:
@@ -56,6 +62,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+//import com.actionbarsherlock.sample.styledactionbar.R;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -68,10 +76,13 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActionBar;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.Menu;
+import android.support.v4.view.MenuItem;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -80,7 +91,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class RadioApp extends Activity {
+public class RadioApp extends FragmentActivity {
 	/** PROPERTIES **/
 	
 	// The context
@@ -115,24 +126,28 @@ public class RadioApp extends Activity {
 		super.onCreate(savedInstanceState);
 
 		// set the custom title
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+		//requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 
 		// indeterminate amount of time for a task
 		// requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
-		// set layout to the "city"
-		setContentView(R.layout.city);
+		// set layout to the "old city"
+		setContentView(R.layout.oldcity);
 
+		//requestWindowFeature(Window.FEATURE_NO_TITLE);
+		
 		// custom title
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
+		/*getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
 				R.layout.window_title);
 
 		// set the custom texview and icon
 		TextView title = (TextView) findViewById(R.id.title);
 		// ImageView icon = (ImageView) findViewById(R.id.windowSearchButton);
-		title.setText("Stations");
+		title.setText("Stations");*/
 		// icon.setImageResource(R.drawable.icon);
 
+		
+		
 		// To indicate it's busy
 		// RadioApp.this.setProgressBarIndeterminate(true);
 		// RadioApp.this.setProgressBarIndeterminateVisibility(true);
@@ -152,6 +167,14 @@ public class RadioApp extends Activity {
 			this._locationTV.setText(_location);
 		}
 
+		// Action Bar! (From ActionBarSherlock)
+		final ActionBar ab = getSupportActionBar();
+		ab.setTitle(city);
+		ab.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD); // standard navigation
+		// background
+		//ab.setBackgroundDrawable(android.R.color.primary_text_dark);
+		//getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.ad_action_bar_gradient_bak));
+		
 		// Check if internet connection is available
 		if (!isNetworkAvailable()) {
 			showToast("No internet connection!", true);
@@ -190,7 +213,7 @@ public class RadioApp extends Activity {
 		_settings = getSharedPreferences(MainActivity.PREFERENCE_FILENAME,
 				MODE_PRIVATE);
 		_defaultCityCheckbox = (CheckBox) findViewById(R.id._defaultCheckbox);
-
+		
 		if (_settings.contains("DEFAULT")) { // Default City Stored
 			String defaultCity = _settings.getString("DEFAULT", "");
 			// if city is the same as the default city, set it to checked
@@ -198,6 +221,8 @@ public class RadioApp extends Activity {
 				_defaultCityCheckbox.setChecked(true);
 		}
 
+		
+		
 		// RadioApp.this.setProgressBarIndeterminate(false);
 		// RadioApp.this.setProgressBarIndeterminateVisibility(false);
 
@@ -215,6 +240,32 @@ public class RadioApp extends Activity {
 		_dataSource.close();
 		super.onPause();
 	}
+	
+	/** Action Bar items (loaded as menu items) **/
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.layout.main_menu, menu);
+		
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	// selecting menu items
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.ab_refresh:		// refresh the song
+				this.refresh(null);
+				return true;
+			case R.id.ab_search:		// perform a new search
+				// TODO:
+				// Look at performing new search
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
+	}
+	
+	
 	/** Updates the current song via button click **/
 	public void refresh(View view) {
 		// progress bar
@@ -397,7 +448,7 @@ public class RadioApp extends Activity {
 	public void searchGrooveshark(View view) {
 		// parse song first
 		StringBuilder s = new StringBuilder(
-				"http://grooveshark.com/#!/search?q=");
+				"http://html5.grooveshark.com/#/search/");
 		s = convertSongInfo(s);
 
 		// make sure it's valid
