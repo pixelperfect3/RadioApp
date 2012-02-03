@@ -107,7 +107,7 @@ public class MainActivity extends Activity {
 		 * just show the stations for that
 		 **/
 		SharedPreferences settings = getSharedPreferences(
-				this.PREFERENCE_FILENAME, MODE_PRIVATE);
+				MainActivity.PREFERENCE_FILENAME, MODE_PRIVATE);
 
 		if (settings.contains("DEFAULT")) { // Default City Stored
 			String defaultCity = settings.getString("DEFAULT", "");
@@ -204,7 +204,7 @@ public class MainActivity extends Activity {
 		}
 
 		// Send info to other city
-		Intent intent = new Intent(this, RadioApp.class);
+		Intent intent = new Intent(this, CityActivity.class);//RadioApp.class);
 		/** Add Bundle here (City, location, etc.): **/
 
 		Bundle parameters = new Bundle();
