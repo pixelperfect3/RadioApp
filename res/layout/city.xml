@@ -1,56 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--  Defines the look for the second (RadioApp) activity -->
+<!-- Defines the look for the second (RadioApp) activity -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/relativeLayout2"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/tile_background"
+    android:tileMode="repeat" >
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent" android:layout_height="fill_parent"
-	android:orientation="vertical" android:background="#FFFFFF">
+    <RelativeLayout
+        android:id="@+id/topLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
 
-			<RelativeLayout
-			    android:id="@+id/relativeLayout2"
-			    android:layout_width="fill_parent"
-			    android:layout_height="464dp" >
+        <TextView
+            android:id="@+id/_location"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dip"
+            android:layout_marginLeft="20dip"
+            android:layout_marginTop="15dip"
+            android:textColor="#FFFFFF"
+            android:textSize="25dp" />
 
-				<RelativeLayout
-				    android:id="@+id/topLayout"
-				    android:layout_width="fill_parent"
-				    android:layout_height="wrap_content" >
+        <CheckBox
+            android:id="@+id/_defaultCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/_location"
+            android:layout_below="@+id/_location"
+            android:onClick="setDefaultCity"
+            android:paddingLeft="40dp"
+            android:text="@string/defaultString"
+            android:textColor="#FFFFFF"
+            android:textSize="17dip"
+            android:typeface="normal" />
+    </RelativeLayout>
 
-					<TextView android:layout_marginLeft="20dip"
-						android:layout_marginTop="15dip" android:layout_marginBottom="5dip"
-						android:textColor="@android:color/black" android:text="Location"
-						android:textSize="25dp" android:layout_height="wrap_content"
-						android:layout_width="fill_parent" android:id="@+id/_location" />
-					<CheckBox android:paddingLeft="40dp" android:textColor="@android:color/black"
-						android:id="@+id/_defaultCheckbox" android:typeface="normal"
-						android:layout_height="wrap_content" android:layout_below="@+id/_location"
-						android:text="Default?" android:layout_width="wrap_content"
-						android:layout_alignLeft="@+id/_location" android:textSize="17dip"
-						android:onClick="setDefaultCity" />
-				</RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/bottomLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/topLayout"
+        android:layout_margin="10dip" >
 
-				<RelativeLayout
-				    android:id="@+id/bottomLayout"
-				    android:layout_width="fill_parent"
-				    android:layout_height="fill_parent"
-				    android:layout_below="@+id/topLayout"
-				    android:layout_margin="10dip" >
+        <TextView
+            android:id="@+id/_stationsLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/stations"
+            android:textColor="#FFFFFF"
+            android:textSize="16dp"
+            android:typeface="sans" />
 
-				    <TextView
-				        android:id="@+id/_stationsLabel"
-				        android:layout_width="wrap_content"
-				        android:layout_height="wrap_content"
-				        android:text="@string/stations" />
+        <ListView
+            android:id="@+id/_stationsList"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_below="@+id/_stationsLabel"
+            android:layout_marginTop="10dip" android:cacheColorHint="@android:color/transparent"/>
+    </RelativeLayout>
 
-				    <ListView
-				        android:id="@+id/_stationsList"
-				        android:layout_width="match_parent"
-				        android:layout_height="fill_parent"
-				        android:layout_below="@+id/_stationsLabel"
-				        android:layout_marginTop="10dip" >
-
-				    </ListView>
-				    
-				</RelativeLayout>
-
-			</RelativeLayout>
-</LinearLayout>
+</RelativeLayout>

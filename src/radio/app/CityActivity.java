@@ -645,7 +645,7 @@ public class CityActivity extends FragmentActivity {
 							CityActivity.this, android.R.layout.simple_list_item_1,
 							stations);
 					//adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-					lv.setAdapter(adapter);
+					lv.setAdapter(cadapter);
 					// now set the listview to listen for changes
 					lv.setOnItemSelectedListener(new MyOnItemSelectedListener());
 				}

@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--  Defines the look for the second (RadioApp) activity -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent" android:layout_height="fill_parent"
-	android:orientation="vertical" android:background="#FFFFFF">
-	<ScrollView android:id="@+id/scrollView1"
+	<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/scrollView1"
 		android:layout_height="fill_parent" android:layout_width="fill_parent">
 		<LinearLayout android:id="@+id/linearLayout1"
 			android:layout_width="fill_parent" android:orientation="vertical"
@@ -80,4 +77,3 @@
 			</RelativeLayout>
 		</LinearLayout>
 	</ScrollView>
-</LinearLayout>
