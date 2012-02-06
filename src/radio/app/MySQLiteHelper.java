@@ -12,7 +12,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 public class MySQLiteHelper extends SQLiteOpenHelper {
-
+	
 	public static final String TABLE_FAVORITES = "favorites";
 	public static final String COLUMN_ID = "_id";
 	public static final String COLUMN_TYPE = "type";
@@ -29,14 +29,13 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
 	public MySQLiteHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
-		
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase database) {
-		
-		database.execSQL(DATABASE_CREATE);
 		Log.v("CREATING DATABASE", "Created Database");
+		database.execSQL(DATABASE_CREATE);
+		
 	}
 
 	@Override
@@ -49,9 +48,9 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 	}
 
 	// deletes the table
-	//public void deleteTable() {
-		//SQLiteDatabase database = getWritableDatabase();
-		//database.execSQL("DROP TABLE IF EXISTS " + TABLE_FAVORITES);
-	//}
+	public void deleteTable() {
+		SQLiteDatabase database = getWritableDatabase();
+		database.execSQL("DROP TABLE IF EXISTS " + TABLE_FAVORITES);
+	}
 	
 }

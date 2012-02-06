@@ -1,48 +1,11 @@
-/** 
- *   
- *  This class is the second activity of the app and does the heavy lifting.
- *
- *  It loads all the stations for a city and allows the user to see what they are currently playing
- *  
- *  
- *  
- *  @author shayan javed (shayanj@gmail.com)
- *  TODO:
-    -Change this class so that it only shows a ListView of stations (can favorite/unfavorite from here).
-      then once user selects a station open up a different activity for the station. (look at google reader for example)
-    -Add search functionality (android search button and window button)
-    -Customize the Spinner
-    -Prettier backgrounds
-    -Just generally less ugly
-    -Use star icons for favouriting							[Functionality DONE]
-    	http://stackoverflow.com/questions/3443588/how-to-get-favorites-star
-    	* Add Toast notification once favorited
-    -Add arrows for moving forward/backward along radio stations
-    -Maybe arrows for showing previously played songs? 
-    
-    -For songs, show options to explore in Amazon/google Music, etc. To open a link, here's an example: [DONE for the most part]
-    	Intent i = new Intent(Intent.ACTION_VIEW, 
-       		Uri.parse("http://www.amazon.com/s/url=search-alias=digital-music&field-keywords=lady+gaga+born+this+way"));
-		startActivity(i);
-    
-      OR:
-      
-      	Intent i = new Intent();
-	  	i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		i.setAction(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
-		i.putExtra(SearchManager.QUERY, mSong.getArtits() + " " + mSong.getName());
-		i.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, "artist");
-		i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "album");
-		i.putExtra(MediaStore.EXTRA_MEDIA_TITLE, mSong.getName());
-		i.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, "audio/*");
-		startActivity(Intent.createChooser(i, "Search for " + mSong.getName()));
-    
-    
-    	URL for android market: 
-    	https://market.android.com/search?q=lady+gaga+born+this+way&c=music
- */
-
 package radio.app;
+/**
+ * This Activity shows information about a selected station 
+ * 
+ * Should show the current song playing (with links to Amazon, Grooveshark, Android Market and Youtube)
+ * 
+ * Allow user to favorite the station (top-right) and see last 5 songs played
+ */
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -60,6 +23,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+//import com.actionbarsherlock.sample.styledactionbar.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -80,22 +45,22 @@ import android.support.v4.view.MenuItem;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class CityActivity extends FragmentActivity {
+public class StationActivity extends FragmentActivity {
 	/** PROPERTIES **/
 	
 	// The context
 	Context context;
 
 	// Strings for location, name, artist, song
-	private String _location = "";
+	private String _stationName = "";
 	private String _selectedChannelName = "";
 	private String _currentArtist = "";
 	private String _currentSong = "";
@@ -110,7 +75,7 @@ public class CityActivity extends FragmentActivity {
 	Time now;
 
 	// Shared Preferences (for default city)
-	public final String PREFERENCE_FILENAME = "CityActivityPreferences";
+	public final String PREFERENCE_FILENAME = "StationActivityPreferences";
 	private SharedPreferences _settings;
 
 	// Database for storing favorites
@@ -122,20 +87,23 @@ public class CityActivity extends FragmentActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		// set layout 
-		setContentView(R.layout.city);
+		// set layout to the "old city"
+		setContentView(R.layout.oldcity);
 
+		// get the text views
+		this._stationInfoTV = (TextView) findViewById(R.id._stationInfoTV);
+		this._currentArtistTV = (TextView) findViewById(R.id._currentArtistTV);
+		this._currentSongTV = (TextView) findViewById(R.id._currentSongTV);
+		
+		// favorite checkbox
+		this._favoriteCheckbox = (CheckBox)findViewById(R.id._favoriteCheckbox);
+		
 		// get the city from the Bundle passed in
-		String city = getIntent().getExtras().getString("CITY_NAME");
-		if (city != null) {
-			_location = city.toUpperCase();
-			this._locationTV = (TextView) findViewById(R.id._location);
-			this._locationTV.setText(_location);
-		}
+		_stationName = getIntent().getExtras().getString("STATION_NAME");
 
 		// Action Bar! (From ActionBarSherlock)
 		final ActionBar ab = getSupportActionBar();
-		ab.setTitle(city);
+		ab.setTitle(_stationName);
 		ab.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD); // standard navigation
 		// background
 		//ab.setBackgroundDrawable(android.R.color.primary_text_dark);
@@ -158,28 +126,21 @@ public class CityActivity extends FragmentActivity {
 		_dataSource.open();
 		_dataSource.delete();*/
 		
-		/** Setup the ListView by populating it with the list of radio stations **/
-		// read the list of stations in an asynctask
-		AsyncTask<String, Void, String[]> readStationsTask = new ReadStationsTask(
-				this).execute();
-
-		Log.v("CHANNELS LOADED:", this._selectedChannelName);
 		// the Time object
 		now = new Time();
 
-		// Show if it's the default city or not
-		_settings = getSharedPreferences(MainActivity.PREFERENCE_FILENAME,
-				MODE_PRIVATE);
-		_defaultCityCheckbox = (CheckBox) findViewById(R.id._defaultCheckbox);
-		
-		if (_settings.contains("DEFAULT")) { // Default City Stored
-			String defaultCity = _settings.getString("DEFAULT", "");
-			// if city is the same as the default city, set it to checked
-			if (city.equalsIgnoreCase(defaultCity))
-				_defaultCityCheckbox.setChecked(true);
-		}
+		// Try to read the JSON information and then update the TextView
+		// boolean update = updateCurrentSong(_selectedChannelName);
+		/*Log.e("SELECTED CHANNEL2:", this._selectedChannelName);
+		if (this._selectedChannelName != "") {
+			AsyncTask<String, Void, Boolean> readTask = new ReadSongTask(this)
+					.execute(_selectedChannelName);// updateCurrentSong(_selectedChannelName);
+		}*/
 
-	} // End of OnCreate
+		// StationActivity.this.setProgressBarIndeterminate(false);
+		// StationActivity.this.setProgressBarIndeterminateVisibility(false);
+
+	}
 
 	/** onPause and onResume methods **/
 	@Override
@@ -222,8 +183,8 @@ public class CityActivity extends FragmentActivity {
 	/** Updates the current song via button click **/
 	public void refresh(View view) {
 		// progress bar
-		CityActivity.this.setProgressBarIndeterminate(true);
-		CityActivity.this.setProgressBarIndeterminateVisibility(true);
+		StationActivity.this.setProgressBarIndeterminate(true);
+		StationActivity.this.setProgressBarIndeterminateVisibility(true);
 
 		if (!isNetworkAvailable()) {
 			// Alert!
@@ -232,22 +193,8 @@ public class CityActivity extends FragmentActivity {
 		}
 
 		// Try to read the JSON information and then update the TextView
-		/*AsyncTask readTask = new ReadSongTask(this)
-				.execute(_selectedChannelName);// updateCurrentSong(_selectedChannelName); */
-	}
-
-	/** Updates the default city via the check box **/
-	public void setDefaultCity(View view) {
-		SharedPreferences.Editor prefEditor = _settings.edit();
-
-		if (this._defaultCityCheckbox.isChecked()) { // set the default city to
-														// the current one
-			prefEditor.putString("DEFAULT", this._location.toUpperCase());
-			prefEditor.commit();
-		} else { // remove it as default
-			prefEditor.remove("DEFAULT");
-			prefEditor.commit();
-		}
+		AsyncTask readTask = new ReadSongTask(this)
+				.execute(_selectedChannelName);// updateCurrentSong(_selectedChannelName);
 	}
 
 	/** Updates the current song on the selected channel **/
@@ -287,7 +234,7 @@ public class CityActivity extends FragmentActivity {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			Log.e(CityActivity.class.getName(), "ERROR!!!: " + e.toString());
+			Log.e(StationActivity.class.getName(), "ERROR!!!: " + e.toString());
 			// t.setText("Exception " + e.toString());
 			//showToast("Error reading song info", false);
 		}
@@ -330,11 +277,11 @@ public class CityActivity extends FragmentActivity {
 					builder.append(line);
 				}
 
-				Log.e(CityActivity.class.toString(),
+				Log.e(StationActivity.class.toString(),
 						"RESPONSE BUILT: " + builder.toString());
 
 			} else {
-				Log.e(CityActivity.class.toString(), "Failed to download file");
+				Log.e(StationActivity.class.toString(), "Failed to download file");
 				finish();
 			}
 		} catch (ClientProtocolException e) {
@@ -497,23 +444,34 @@ public class CityActivity extends FragmentActivity {
 		return activeNetworkInfo != null;
 	}
 
-	/** Inner class used just for listening to the ListView **/
-	public class MyOnItemClickListener implements OnItemClickListener {
+	/** Inner class used just for listening to the Spinner **/
+	public class MyOnItemSelectedListener implements OnItemSelectedListener {
 
-		// When item selected start new station activity
-		public void onItemClick(AdapterView<?> parent, View view, int pos,
+		// When item selected
+		// Should update the name if it's different from the current one and
+		// then refresh the song name
+		public void onItemSelected(AdapterView<?> parent, View view, int pos,
 				long id) {
-				
+			// Get the selected station
+			//String station = parent.getItemAtPosition(pos).toString();
+
+			//Log.v("SELECTED STATION!!:", station);
+			// Extract the 4-letter name
+			//Scanner scan = new Scanner(station);
+			//String name = station;//scan.next();
+
+			// Try to update the song if possible
+			/*if (name.equals(_selectedChannelName)) {
+				// same channel, so no need to update
+				return;
+			} else {*/
+				// Try to read the JSON information and then update the TextView
 			_selectedChannelName = parent.getItemAtPosition(pos).toString();
-			Log.v("Clicked List:", _selectedChannelName);
+
+			@SuppressWarnings("unused")
+			AsyncTask<String, Void, Boolean> readTask = new ReadSongTask(
+					StationActivity.this).execute(_selectedChannelName);// updateCurrentSong(_selectedChannelName);
 			
-			Intent intent = new Intent(CityActivity.this, StationActivity.class);
-
-			Bundle parameters = new Bundle();
-			parameters.putString("STATION_NAME", _selectedChannelName);
-			intent.putExtras(parameters);
-
-			CityActivity.this.startActivity(intent); 
 		}
 
 		public void onNothingSelected(AdapterView<?> parent) {
@@ -531,134 +489,6 @@ public class CityActivity extends FragmentActivity {
 		return proper;
 	}
 
-	/***
-	 * AsyncTask class for reading all the stations
-	 */
-	private class ReadStationsTask extends AsyncTask<String, Void, String[]> {
-		// The dialog bar to show indeterminate progress
-		private ProgressDialog dialog;
-		private Context theContext;
-
-		// constructor
-		public ReadStationsTask(Activity activity) {
-			theContext = activity;
-			CityActivity.this.setProgressBarIndeterminate(true);
-			CityActivity.this.setProgressBarIndeterminateVisibility(true);
-			// start the progress dialog
-			dialog = new ProgressDialog(theContext);
-		}
-
-		@Override
-		protected String[] doInBackground(String... params) {
-			// perform long running operation operation
-			// update the list of stations
-
-			String channelJSON = readJSON(_location, false);
-			Log.v(CityActivity.class.getName(), "channelJSON: " + channelJSON);
-
-			try {
-				// create the json object from the string
-				JSONObject jsonobj = new JSONObject(channelJSON);
-
-				// get the array of stations
-				JSONArray jsonArray = new JSONArray(
-						jsonobj.getString("stations"));
-
-				/** TODO: Perhaps part below should be in postExecute()? **/
-
-				// Create the array of strings which will be used for populating
-				// the spinner
-				String[] stations = new String[jsonArray.length()];
-
-				// If not stations found
-				if (stations.length == 0) {
-					showToast("No stations found!", false);
-					finish(); // TODO: Properly show dialog
-				}
-
-				// go through each station
-				for (int i = 0; i < jsonArray.length(); i++) {
-					JSONObject jsonObject = jsonArray.getJSONObject(i);
-					// get the station name
-					String name = jsonObject.getString("name");
-					// get the description
-					String desc = properFormat(jsonObject.getString("desc"));
-
-					// add to the string array
-					stations[i] = name + " " + desc;
-				}
-
-				return stations;
-
-			} catch (Exception e) {
-				Log.e(CityActivity.class.getName(),
-						"JSON Exception: " + e.toString());
-				return null;
-			}
-		}
-
-		@Override
-		protected void onPostExecute(String[] result) {
-			// execution of result of Long time consuming operation
-			// dismiss the dialog
-			dialog.dismiss();
-	
-			try {
-				// get list of all the stations from the task
-				String[] stations = new String[1];
-
-				// get() causes a block on the UI Thread!
-				stations = this.get();
-
-				if (stations != null) {
-					// set selected channel to the first one
-					CityActivity.this._selectedChannelName = stations[0];
-					Log.v("SELECTED CHANNEL:", CityActivity.this._selectedChannelName);
-					
-					// Populate the ListView
-					ListView lv = (ListView) findViewById(R.id._stationsList);
-					CustomArrayAdapter cadapter = new CustomArrayAdapter( // TODO: Not working for some reason
-							CityActivity.this,
-							stations);
-		
-					lv.setAdapter(cadapter);
-					// now set the listview to listen for changes
-					lv.setOnItemClickListener(new MyOnItemClickListener());
-					//lv.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-					/*lv.setOnItemClickListener(new OnItemClickListener() {
-					    @Override
-					    public void onItemClick(AdapterView<?> list, View view, int position, long id) {
-					        Log.i("Clicked!!", "onListItemClick: " + position);
-
-					        }
-
-					    }
-					);*/
-				}
-			} catch (Exception e) {
-				Log.e("Reading Stations", "Cannot execute AsyncTask");
-			}
-		}
-
-		@Override
-		protected void onPreExecute() {
-			// Things to be done before execution of long running operation. For
-			// example showing ProgessDialog
-
-			// set the properties of the progressdialog
-			// make sure it's indeterminate
-			this.dialog.setMessage("Loading list of stations");
-			this.dialog.setIndeterminate(true);
-			this.dialog.show();
-		}
-
-		@Override
-		protected void onProgressUpdate(Void... values) {
-			// Things to be done while execution of long running operation is in
-			// progress. For example updating ProgessDialog
-		}
-	}
-
 	/** End of AsyncTask class **/
 
 	/***
@@ -672,8 +502,8 @@ public class CityActivity extends FragmentActivity {
 		// constructor
 		public ReadSongTask(Activity activity) {
 			theContext = activity;
-			CityActivity.this.setProgressBarIndeterminate(true);
-			CityActivity.this.setProgressBarIndeterminateVisibility(true);
+			StationActivity.this.setProgressBarIndeterminate(true);
+			StationActivity.this.setProgressBarIndeterminateVisibility(true);
 			// start the progress dialog
 			dialog = new ProgressDialog(theContext);
 		}
@@ -700,7 +530,7 @@ public class CityActivity extends FragmentActivity {
 			// Check if channel is already a favorite and update the star checkbox
 			// TODO: Make it more efficient so you don't have to check everytime
 			// TODO Temporary: We are currently getting all comments, but only get selected ones
-			List<Favorite> favorites = CityActivity.this._dataSource.getAllFavorites();
+			List<Favorite> favorites = StationActivity.this._dataSource.getAllFavorites();
 			boolean isChecked = false;
 			for (int i = 0; i < favorites.size(); i++) {
 				if (favorites.get(i).getName().equals(_selectedChannelName)) { 
@@ -710,12 +540,12 @@ public class CityActivity extends FragmentActivity {
 			}
 			
 			if (isChecked)
-				CityActivity.this._favoriteCheckbox.setChecked(true);
+				StationActivity.this._favoriteCheckbox.setChecked(true);
 			else
-				CityActivity.this._favoriteCheckbox.setChecked(false);
+				StationActivity.this._favoriteCheckbox.setChecked(false);
 			
-			CityActivity.this.setProgressBarIndeterminate(false);
-			CityActivity.this.setProgressBarIndeterminateVisibility(false);
+			StationActivity.this.setProgressBarIndeterminate(false);
+			StationActivity.this.setProgressBarIndeterminateVisibility(false);
 		}
 
 		@Override

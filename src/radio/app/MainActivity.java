@@ -36,29 +36,32 @@ import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
+
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+//import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
+//import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemSelectedListener;
 
 public class MainActivity extends Activity {
 	
 	/** PROPERTIES **/
-	private EditText _searchText;  // Search text box
+	private EditText _searchText;  											// Search text box
 	public static final String PREFERENCE_FILENAME = "RadioAppPreferences"; // Shared preferences name
-	private ListView _favoritesLV; // ListView for showing favorites
-	private FavoritesDataSource _dataSource; // Database for storing favorites
+	private ListView _favoritesLV; 											// ListView for showing favorites
+	private FavoritesDataSource _dataSource; 								// Database for storing favorites
 	// GPS
 	private LocationManager locationManager;
 	private double _latitude, _longitude;
@@ -102,6 +105,18 @@ public class MainActivity extends Activity {
 		locationManager = (LocationManager) this
 				.getSystemService(Context.LOCATION_SERVICE);
 
+		
+		// TODO: Open it again on onResume?
+		// temporary - to delete a whole database
+		//this.deleteDatabase("favorites.db");
+		
+		/** Open the favorites database **/
+		_dataSource = new FavoritesDataSource(this);
+		_dataSource.open();
+		
+		// Show the favorites
+		updateFavorites();
+		
 		/**
 		 * Check Shared preferences - if there is a default city already stored,
 		 * just show the stations for that
@@ -116,12 +131,7 @@ public class MainActivity extends Activity {
 
 		}
 
-		/** Open the favorites database **/
-		_dataSource = new FavoritesDataSource(this);
-		_dataSource.open();
 		
-		// Show the favorites
-		updateFavorites();
 		
 	} // End of OnCreate
 
@@ -131,11 +141,42 @@ public class MainActivity extends Activity {
 		// get all the favorites
 		List<Favorite> values = _dataSource.getAllFavorites();
 
-		// Use the SimpleCursorAdapter to show the
-		// elements in a ListView
-		ArrayAdapter<Favorite> adapter = new ArrayAdapter<Favorite>(this,
-				android.R.layout.simple_list_item_1, values);
+		// Populate the ListView
+		FavoritesArrayAdapter adapter = new FavoritesArrayAdapter(
+				MainActivity.this,
+				values);
 		_favoritesLV.setAdapter(adapter);
+		
+		// now set the listview to listen for changes
+		_favoritesLV.setOnItemSelectedListener(new FavoriteSelectedListener());
+	}
+	
+	/** Inner class used just for listening to the Favorites ListView **/
+	public class FavoriteSelectedListener implements OnItemSelectedListener {
+
+		// When item selected should start a StationActivity (or song activity?)
+		public void onItemSelected(AdapterView<?> parent, View view, int pos,
+				long id) {
+			
+			// Get the selected favorite
+			Favorite fave = (Favorite)parent.getItemAtPosition(pos);
+			
+			// TODO: start the station activity
+			/*Intent intent = new Intent(this, StationActivity.class);//RadioApp.class);
+
+			Bundle parameters = new Bundle();
+			parameters.putString("STATION_NAME", fave.getName().substring(0, 4));
+			intent.putExtras(parameters);
+
+			this.startActivity(intent); **/
+			
+		}
+
+		@Override
+		public void onNothingSelected(AdapterView<?> arg0) {
+			// TODO Auto-generated method stub
+			
+		}
 	}
 	
 	/** Method called when search button is pressed **/
@@ -270,30 +311,6 @@ public class MainActivity extends Activity {
 
 		Toast toast = Toast.makeText(context, text, duration);
 		toast.show();
-	}
-
-	/** Private class for handling GPS Updates **/
-	private class MyLocationListener implements LocationListener {
-
-		public void onLocationChanged(Location argLocation) {
-			// TODO Auto-generated method stub
-			/*
-			 * myLatitude.setText(String.valueOf( argLocation.getLatitude()));
-			 * myLongitude.setText(String.valueOf( argLocation.getLongitude()));
-			 */
-		}
-
-		public void onProviderDisabled(String provider) {
-			// TODO Auto-generated method stub
-		}
-
-		public void onProviderEnabled(String provider) {
-			// TODO Auto-generated method stub
-		}
-
-		public void onStatusChanged(String provider, int status, Bundle extras) {
-			// TODO Auto-generated method stub
-		}
 	}
 
 }

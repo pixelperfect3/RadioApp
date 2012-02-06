@@ -57,7 +57,8 @@
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
             android:layout_below="@+id/_stationsLabel"
-            android:layout_marginTop="10dip" android:cacheColorHint="@android:color/transparent"/>
+            android:layout_marginTop="10dip" android:cacheColorHint="@android:color/transparent" android:scrollbarAlwaysDrawVerticalTrack="true" android:clickable="true" 
+            android:focusable="true" android:focusableInTouchMode="true" />
     </RelativeLayout>
 
 </RelativeLayout>

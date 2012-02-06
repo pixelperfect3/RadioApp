@@ -33,7 +33,9 @@ public class FavoritesDataSource {
 	}
 
 	public void open() throws SQLException {
+		
 		database = dbHelper.getWritableDatabase();
+		//Log.v("CREATING DATABASE", "3");
 	}
 
 	public void close() {
@@ -41,9 +43,9 @@ public class FavoritesDataSource {
 	}
 
 	/** Deletes the table **/
-	//public void delete() {
-		//dbHelper.deleteTable();
-	//}
+	public void delete() {
+		dbHelper.deleteTable();
+	}
 	
 	/** Creates a Favorite object according to type and name **/
 	public void createFavorite(Favorite.Type type, String name) {
