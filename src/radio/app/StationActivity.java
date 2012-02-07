@@ -5,6 +5,12 @@ package radio.app;
  * Should show the current song playing (with links to Amazon, Grooveshark, Android Market and Youtube)
  * 
  * Allow user to favorite the station (top-right) and see last 5 songs played
+ * 
+ * TODO:
+ * -Show time
+ * -Custom bg for header
+ * -Show last 5 songs?
+ * -
  */
 
 import java.io.BufferedReader;
@@ -32,7 +38,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -47,9 +52,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,17 +69,13 @@ public class StationActivity extends FragmentActivity {
 	private String _currentSong = "";
 
 	// The TextViews
-	TextView _locationTV, _stationInfoTV, _currentArtistTV, _currentSongTV;
+	TextView _stationInfoTV, _currentArtistTV, _currentSongTV;
 
-	// Checkbox for default city and favorite station
-	CheckBox _defaultCityCheckbox, _favoriteCheckbox;
+	// Checkbox (star) for favoriting 
+	CheckBox _favoriteCheckbox;
 
 	// Time
 	Time now;
-
-	// Shared Preferences (for default city)
-	public final String PREFERENCE_FILENAME = "StationActivityPreferences";
-	private SharedPreferences _settings;
 
 	// Database for storing favorites
 	private FavoritesDataSource _dataSource;
@@ -88,23 +87,29 @@ public class StationActivity extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 
 		// set layout to the "old city"
-		setContentView(R.layout.oldcity);
+		setContentView(R.layout.station);
 
 		// get the text views
-		this._stationInfoTV = (TextView) findViewById(R.id._stationInfoTV);
 		this._currentArtistTV = (TextView) findViewById(R.id._currentArtistTV);
 		this._currentSongTV = (TextView) findViewById(R.id._currentSongTV);
 		
 		// favorite checkbox
 		this._favoriteCheckbox = (CheckBox)findViewById(R.id._favoriteCheckbox);
 		
-		// get the city from the Bundle passed in
+		// get the station from the Bundle passed in
 		_stationName = getIntent().getExtras().getString("STATION_NAME");
-
+		
+		// extract the first four letters for the channel name
+		String[] split = this._stationName.split(" ");
+		_selectedChannelName = split[0];
+		_stationName = split[0] + " " + split[1];
 		// Action Bar! (From ActionBarSherlock)
 		final ActionBar ab = getSupportActionBar();
 		ab.setTitle(_stationName);
 		ab.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD); // standard navigation
+		//ab.setDisplayHomeAsUpEnabled(true);
+		ab.setDisplayShowHomeEnabled(false);
+		
 		// background
 		//ab.setBackgroundDrawable(android.R.color.primary_text_dark);
 		//getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.ad_action_bar_gradient_bak));
@@ -113,29 +118,25 @@ public class StationActivity extends FragmentActivity {
 		if (!isNetworkAvailable()) {
 			showToast("No internet connection!", true);
 
-			// Create an alert dialog
-			// showDialog("No Internet Connection! Enable WiFi or 3G");
 			return;
 		}
 
 		/** Open the favorites database **/
 		_dataSource = new FavoritesDataSource(this);
 		_dataSource.open();
-		/*_dataSource.delete(); // TODO: Temporary!
-		_dataSource = new FavoritesDataSource(this);
-		_dataSource.open();
-		_dataSource.delete();*/
 		
 		// the Time object
 		now = new Time();
 
-		// Try to read the JSON information and then update the TextView
-		// boolean update = updateCurrentSong(_selectedChannelName);
-		/*Log.e("SELECTED CHANNEL2:", this._selectedChannelName);
+		
+		
+		// Try to read the JSON information and read the current song
+		
+		Log.e("SELECTED CHANNEL2:", this._selectedChannelName);
 		if (this._selectedChannelName != "") {
 			AsyncTask<String, Void, Boolean> readTask = new ReadSongTask(this)
 					.execute(_selectedChannelName);// updateCurrentSong(_selectedChannelName);
-		}*/
+		}
 
 		// StationActivity.this.setProgressBarIndeterminate(false);
 		// StationActivity.this.setProgressBarIndeterminateVisibility(false);
@@ -158,7 +159,30 @@ public class StationActivity extends FragmentActivity {
 	/** Action Bar items (loaded as menu items) **/
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.layout.main_menu, menu);
+		getMenuInflater().inflate(R.layout.station_header, menu);
+		
+		// Check if channel is already a favorite and update the star checkbox
+		// TODO: Make it more efficient so you don't have to check everytime
+		// TODO Temporary: We are currently getting all comments, but only get selected ones
+		List<Favorite> favorites = this._dataSource.getAllFavorites();
+		boolean isChecked = false;
+		for (int i = 0; i < favorites.size(); i++) {
+			if (favorites.get(i).getName().equals(_stationName)) { 
+				isChecked = true;
+				break;
+			}
+		}
+		
+		MenuItem item = menu.getItem(1);
+		
+		if (isChecked) {
+			item.setChecked(true);
+			item.setIcon(android.R.drawable.btn_star_big_on);
+		}
+		else {
+			item.setChecked(false);
+			item.setIcon(android.R.drawable.btn_star_big_off);
+		}
 		
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -174,6 +198,19 @@ public class StationActivity extends FragmentActivity {
 				// TODO:
 				// Look at performing new search
 				return true;
+			case R.id.ab_favorite:
+				// TODO: Implement favoriting a station
+				// change the star icon appropriately
+				item.setChecked(!item.isChecked());
+				if (item.isChecked()) {
+					item.setIcon(android.R.drawable.btn_star_big_on);
+					this.setFavoriteStation(true);
+				}
+				else {
+					item.setIcon(android.R.drawable.btn_star_big_off);
+					this.setFavoriteStation(false);
+				}
+				return true;
 			default:
 				return super.onOptionsItemSelected(item);
 		}
@@ -182,10 +219,6 @@ public class StationActivity extends FragmentActivity {
 	
 	/** Updates the current song via button click **/
 	public void refresh(View view) {
-		// progress bar
-		StationActivity.this.setProgressBarIndeterminate(true);
-		StationActivity.this.setProgressBarIndeterminateVisibility(true);
-
 		if (!isNetworkAvailable()) {
 			// Alert!
 			showDialog("No Internet Connection! Enable WiFi or 3G");
@@ -235,6 +268,7 @@ public class StationActivity extends FragmentActivity {
 		} catch (Exception e) {
 			e.printStackTrace();
 			Log.e(StationActivity.class.getName(), "ERROR!!!: " + e.toString());
+			//this.showToast("Nothing playing on this station right now", false);
 			// t.setText("Exception " + e.toString());
 			//showToast("Error reading song info", false);
 		}
@@ -287,23 +321,27 @@ public class StationActivity extends FragmentActivity {
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
 			this._stationInfoTV.setText("Exception " + e.toString());
+			this.showToast("Nothing playing on this station right now", false);
 		} catch (IOException e) {
 			e.printStackTrace();
 			this._stationInfoTV.setText("Exception " + e.toString());
+			this.showToast("Nothing playing on this station right now", false);
 		}
 		return builder.toString();
 	}
 
 	/** Allows the user to set the current station as a favorite **/
-	public void setFavoriteStation(View view) {
+	public void setFavoriteStation(boolean setFavorite) {//View view) {
 		// TODO:
-		if (this._favoriteCheckbox.isChecked()) { // set as favorite
-			this._dataSource.createFavorite(Favorite.Type.STATION, this._selectedChannelName);
+		if (setFavorite) { // set as favorite
+			this._dataSource.createFavorite(Favorite.Type.STATION, this._stationName);
+			this.showToast(this._stationName + " added as a favorite", true);
 		} else { // remove as favorite
 			Favorite f = new Favorite();
-			f.setName(this._selectedChannelName);
+			f.setName(this._stationName);
 			f.setType(Favorite.Type.STATION);
 			this._dataSource.deleteFavorite(f);
+			this.showToast(this._stationName + " removed as a favorite", true);
 		}
 	}
 	
@@ -453,19 +491,7 @@ public class StationActivity extends FragmentActivity {
 		public void onItemSelected(AdapterView<?> parent, View view, int pos,
 				long id) {
 			// Get the selected station
-			//String station = parent.getItemAtPosition(pos).toString();
 
-			//Log.v("SELECTED STATION!!:", station);
-			// Extract the 4-letter name
-			//Scanner scan = new Scanner(station);
-			//String name = station;//scan.next();
-
-			// Try to update the song if possible
-			/*if (name.equals(_selectedChannelName)) {
-				// same channel, so no need to update
-				return;
-			} else {*/
-				// Try to read the JSON information and then update the TextView
 			_selectedChannelName = parent.getItemAtPosition(pos).toString();
 
 			@SuppressWarnings("unused")
@@ -522,30 +548,15 @@ public class StationActivity extends FragmentActivity {
 			// dismiss the dialog
 			dialog.dismiss();
 			String time = now.format("%H:%M");
-			_stationInfoTV.setText("Station: " + _selectedChannelName
-					+ "\n\tTime: " + time);
+			/*_stationInfoTV.setText("Station: " + _selectedChannelName
+					+ "\n\tTime: " + time);*/
+			if (result) {
 			_currentArtistTV.setText("Artist:\n\t" + _currentArtist);
 			_currentSongTV.setText("Song:\n\t" + _currentSong);
-			
-			// Check if channel is already a favorite and update the star checkbox
-			// TODO: Make it more efficient so you don't have to check everytime
-			// TODO Temporary: We are currently getting all comments, but only get selected ones
-			List<Favorite> favorites = StationActivity.this._dataSource.getAllFavorites();
-			boolean isChecked = false;
-			for (int i = 0; i < favorites.size(); i++) {
-				if (favorites.get(i).getName().equals(_selectedChannelName)) { 
-					isChecked = true;
-					break;
-				}
 			}
+			else // no response 
+				StationActivity.this.showToast("Nothing playing on this station right now", true);
 			
-			if (isChecked)
-				StationActivity.this._favoriteCheckbox.setChecked(true);
-			else
-				StationActivity.this._favoriteCheckbox.setChecked(false);
-			
-			StationActivity.this.setProgressBarIndeterminate(false);
-			StationActivity.this.setProgressBarIndeterminateVisibility(false);
 		}
 
 		@Override

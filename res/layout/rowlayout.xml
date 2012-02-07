@@ -13,7 +13,8 @@
         android:layout_alignParentLeft="true"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="10dp" 
-        style="?android:attr/starStyle"/>
+        style="?android:attr/starStyle"
+        android:onClick="setFavoriteStation"/>
 
     <TextView
         android:id="@+id/_stationName1"

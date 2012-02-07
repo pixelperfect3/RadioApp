@@ -244,7 +244,7 @@ public class RadioApp extends FragmentActivity {
 	/** Action Bar items (loaded as menu items) **/
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.layout.main_menu, menu);
+		getMenuInflater().inflate(R.layout.city_header, menu);
 		
 		return super.onCreateOptionsMenu(menu);
 	}

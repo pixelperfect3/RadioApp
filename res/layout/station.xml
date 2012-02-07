@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--  Defines the look for the Station Activity -->
+
+	<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/scrollView1"
+		android:layout_height="fill_parent" android:layout_width="fill_parent">
+			<RelativeLayout android:layout_width="fill_parent"
+				android:id="@+id/relativeLayout3" android:layout_height="wrap_content">
+				<TextView android:layout_marginLeft="20dip"
+					android:layout_marginTop="20dip" android:layout_marginBottom="5dip"
+					android:textColor="@android:color/black" android:text=""
+					android:textSize="18dp" android:layout_height="wrap_content"
+					android:layout_width="wrap_content" android:id="@+id/_stationInfoTV"
+					android:layout_alignParentLeft="true" android:paddingRight="50dip" />
+				<TextView android:layout_marginBottom="10dip"
+					android:textColor="@android:color/black" android:text="@string/artist"
+					android:textSize="17dp" android:layout_height="wrap_content"
+					android:layout_below="@+id/_stationInfoTV" android:layout_width="wrap_content"
+					android:id="@+id/_currentArtistTV" android:layout_alignLeft="@+id/_stationInfoTV" />
+				<TextView android:layout_marginBottom="10dip"
+					android:textColor="@android:color/black" android:text="@string/song"
+					android:textSize="17dp" android:layout_height="wrap_content"
+					android:layout_below="@+id/_currentArtistTV" android:layout_width="wrap_content"
+					android:id="@+id/_currentSongTV" android:layout_alignLeft="@+id/_currentArtistTV" />
+				<RelativeLayout android:layout_below="@+id/_currentSongTV"
+					android:layout_width="fill_parent" android:layout_alignLeft="@+id/_currentSongTV"
+					android:id="@+id/relativeLayout4" android:layout_marginBottom="10dip"
+					android:layout_height="fill_parent">
+					<ImageButton android:layout_height="wrap_content"
+						android:id="@+id/_amazonButton" android:layout_width="wrap_content"
+						android:background="@drawable/amazon" android:onClick="searchAmazon" />
+					<ImageButton android:layout_alignTop="@+id/_amazonButton"
+						android:layout_height="wrap_content" android:id="@+id/_gsButton"
+						android:layout_width="wrap_content" android:layout_toRightOf="@+id/_amazonButton"
+						android:background="@drawable/grooveshark" android:onClick="searchGrooveshark"
+						android:layout_marginLeft="20dip" />
+					<ImageButton android:layout_height="wrap_content"
+						android:id="@+id/_androidMarketButton" android:layout_width="wrap_content"
+						android:layout_toRightOf="@+id/_gsButton" android:background="@drawable/android_market"
+						android:onClick="searchAndroidMarket" android:layout_marginLeft="20dip" />
+					<ImageButton android:layout_height="wrap_content"
+						android:id="@+id/_youtubeButton" android:layout_width="wrap_content"
+						android:layout_toRightOf="@+id/_androidMarketButton"
+						android:background="@drawable/youtube" android:onClick="searchYoutube"
+						android:layout_marginLeft="20dip" />
+				</RelativeLayout>
+			</RelativeLayout>
+	</ScrollView>

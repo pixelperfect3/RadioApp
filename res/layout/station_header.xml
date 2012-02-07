@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--  Action Bar menu for the City Activity -->
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    
+	<!-- refresh -->
+	<item android:id="@+id/ab_refresh" android:showAsAction="ifRoom"
+		android:title="" android:icon="@drawable/ic_menu_refresh" />
+
+	<!-- favorite -->
+	<item android:id="@+id/ab_favorite" android:showAsAction="ifRoom"
+		android:title="" android:icon="@android:drawable/btn_star_big_off" 
+		android:checkable="true"/>
+	
+	<!--  search -->
+	<item android:id="@+id/ab_search" android:showAsAction="ifRoom"
+		android:title="" android:icon="@android:drawable/ic_menu_search" />
+
+	
+	
+</menu>

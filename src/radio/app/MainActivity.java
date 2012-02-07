@@ -7,13 +7,11 @@
  *  It also shows the favourite stations/songs of the user.
  *  
  *  TODO:
- *  -Create custom ListView/ListAdapter (use in both this and RadioApp.java)
+ *  -Create custom ListView/ListAdapter (use in both this and StationActivity.java). Needs to be done for this class
  *  -Show favourite stations (cities?)
  *  	* Should be able to click on station to open up StationView.java or something
  	-Add autocomplete option (by cities)
  	-Custom background
- 	-Look up default city - if not there, then show this screen, 							 	[DONE]
- 	  otherwise move to the second screen. 
 	-Have main app name with search box (should lead to different activity) 					[DONE]
     -Allow location by GPS 																		[PARTIALLY DONE]
     
@@ -135,6 +133,21 @@ public class MainActivity extends Activity {
 		
 	} // End of OnCreate
 
+	/** onPause and onResume methods **/
+	@Override
+	protected void onResume() {
+		_dataSource.open();
+		// update favorites
+		updateFavorites();
+		super.onResume();
+	}
+
+	@Override
+	protected void onPause() {
+		_dataSource.close();
+		super.onPause();
+	}
+	
 	/** Updates the favorites list **/
 	// TODO: Should also be called on onResume()?
 	private void updateFavorites() {
@@ -162,13 +175,13 @@ public class MainActivity extends Activity {
 			Favorite fave = (Favorite)parent.getItemAtPosition(pos);
 			
 			// TODO: start the station activity
-			/*Intent intent = new Intent(this, StationActivity.class);//RadioApp.class);
+			Intent intent = new Intent(MainActivity.this, StationActivity.class);//RadioApp.class);
 
 			Bundle parameters = new Bundle();
-			parameters.putString("STATION_NAME", fave.getName().substring(0, 4));
+			parameters.putString("STATION_NAME", fave.getName());
 			intent.putExtras(parameters);
 
-			this.startActivity(intent); **/
+			MainActivity.this.startActivity(intent); 
 			
 		}
 

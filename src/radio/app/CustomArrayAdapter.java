@@ -7,7 +7,10 @@
 
 package radio.app;
 
+import java.util.List;
+
 import android.content.Context;
+import android.support.v4.view.MenuItem;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,11 +22,20 @@ public class CustomArrayAdapter extends ArrayAdapter<String> {
 	private final Context context;
 	private final String[] values;
 	
+	// Database for storing favorites
+	private FavoritesDataSource _dataSource;
+	List<Favorite> favorites; // all the favorites
+	
 	// For Strings
 	public CustomArrayAdapter(Context context, String[] values) {
 		super(context, R.layout.rowlayout, values);
 		this.context = context;
 		this.values = values;
+		
+		/** Open the favorites database **/
+		_dataSource = new FavoritesDataSource(context);
+		_dataSource.open();
+		favorites = this._dataSource.getAllFavorites();
 	}
 	
 	static class ViewHolder {
@@ -46,7 +58,7 @@ public class CustomArrayAdapter extends ArrayAdapter<String> {
 			viewHolder = new ViewHolder();
 			viewHolder.text1 = (TextView) convertView.findViewById(R.id._stationName1);
 			viewHolder.text2 = (TextView) convertView.findViewById(R.id._stationName2);
-			viewHolder.checkbox = (CheckBox) convertView.findViewById(R.id._favoriteCheckbox);
+			viewHolder.checkbox = (CheckBox) convertView.findViewById(R.id._favoriteStar);
 			
 			convertView.setTag(viewHolder);
 		} 
@@ -57,11 +69,24 @@ public class CustomArrayAdapter extends ArrayAdapter<String> {
 		// Break up the string into two
 		String[] pieces = values[position].split(" - ");
 		
-		
 		viewHolder.text1.setText(pieces[0]);
 		if (pieces.length > 1)
 			viewHolder.text2.setText(pieces[1]);
 
+		// Star to show if station is favorited or not
+		boolean isChecked = false;
+		for (int i = 0; i < favorites.size(); i++) {
+			if (favorites.get(i).getName().contains(pieces[0])) { 
+				isChecked = true;
+				break;
+			}
+		}
+		
+		if (isChecked)
+			viewHolder.checkbox.setChecked(true);
+		else 
+			viewHolder.checkbox.setChecked(false);
+		
 		return convertView;
 	}
 }

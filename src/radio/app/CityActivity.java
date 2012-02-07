@@ -8,38 +8,12 @@
  *  
  *  @author shayan javed (shayanj@gmail.com)
  *  TODO:
-    -Change this class so that it only shows a ListView of stations (can favorite/unfavorite from here).
-      then once user selects a station open up a different activity for the station. (look at google reader for example)
-    -Add search functionality (android search button and window button)
-    -Customize the Spinner
     -Prettier backgrounds
     -Just generally less ugly
-    -Use star icons for favouriting							[Functionality DONE]
-    	http://stackoverflow.com/questions/3443588/how-to-get-favorites-star
-    	* Add Toast notification once favorited
-    -Add arrows for moving forward/backward along radio stations
-    -Maybe arrows for showing previously played songs? 
     
-    -For songs, show options to explore in Amazon/google Music, etc. To open a link, here's an example: [DONE for the most part]
-    	Intent i = new Intent(Intent.ACTION_VIEW, 
-       		Uri.parse("http://www.amazon.com/s/url=search-alias=digital-music&field-keywords=lady+gaga+born+this+way"));
-		startActivity(i);
-    
-      OR:
-      
-      	Intent i = new Intent();
-	  	i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		i.setAction(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
-		i.putExtra(SearchManager.QUERY, mSong.getArtits() + " " + mSong.getName());
-		i.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, "artist");
-		i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, "album");
-		i.putExtra(MediaStore.EXTRA_MEDIA_TITLE, mSong.getName());
-		i.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, "audio/*");
-		startActivity(Intent.createChooser(i, "Search for " + mSong.getName()));
-    
-    
-    	URL for android market: 
-    	https://market.android.com/search?q=lady+gaga+born+this+way&c=music
+    -For list of stations, make sure you show which are already favorited
+    -Implement favoriting/unfavoriting a station
+ 
  */
 
 package radio.app;
@@ -48,8 +22,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.List;
-import java.util.Scanner;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -70,7 +42,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActionBar;
@@ -80,7 +51,6 @@ import android.support.v4.view.MenuItem;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CheckBox;
@@ -97,8 +67,6 @@ public class CityActivity extends FragmentActivity {
 	// Strings for location, name, artist, song
 	private String _location = "";
 	private String _selectedChannelName = "";
-	private String _currentArtist = "";
-	private String _currentSong = "";
 
 	// The TextViews
 	TextView _locationTV, _stationInfoTV, _currentArtistTV, _currentSongTV;
@@ -144,19 +112,12 @@ public class CityActivity extends FragmentActivity {
 		// Check if internet connection is available
 		if (!isNetworkAvailable()) {
 			showToast("No internet connection!", true);
-
-			// Create an alert dialog
-			// showDialog("No Internet Connection! Enable WiFi or 3G");
 			return;
 		}
 
 		/** Open the favorites database **/
 		_dataSource = new FavoritesDataSource(this);
 		_dataSource.open();
-		/*_dataSource.delete(); // TODO: Temporary!
-		_dataSource = new FavoritesDataSource(this);
-		_dataSource.open();
-		_dataSource.delete();*/
 		
 		/** Setup the ListView by populating it with the list of radio stations **/
 		// read the list of stations in an asynctask
@@ -197,7 +158,7 @@ public class CityActivity extends FragmentActivity {
 	/** Action Bar items (loaded as menu items) **/
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.layout.main_menu, menu);
+		getMenuInflater().inflate(R.layout.city_header, menu);
 		
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -248,51 +209,6 @@ public class CityActivity extends FragmentActivity {
 			prefEditor.remove("DEFAULT");
 			prefEditor.commit();
 		}
-	}
-
-	/** Updates the current song on the selected channel **/
-	private boolean updateCurrentSong(String channelName) {
-		// Read all the JSON information
-		// Need to add the "[" and "]" so that it can be properly parsed
-		String handle = new Scanner(channelName).next();
-		String readJSONFeed = "[" + readJSON(handle, true) + "]";
-
-		try {
-			// convert it to a json array
-			JSONArray jsonArray = new JSONArray(readJSONFeed);
-			if (jsonArray.length() < 1) // nothing read
-				return false;
-			
-			// get the first object which has all the info
-			JSONObject firstJson = jsonArray.getJSONObject(0);
-
-			// get the name of the artist and the song
-			JSONObject currentSong = firstJson.getJSONObject("now");
-			String artist = properFormat(currentSong.getString("artist"));
-			String song = properFormat(currentSong.getString("song"));
-
-			// don't bother updating if it's still the same song
-			if (song.equals(_currentSong)) {
-				return true;
-			}
-
-			_currentArtist = artist;
-			_currentSong = song;
-
-			// Get the current time
-			// now = new Time();
-			now.setToNow();
-
-			return true;
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			Log.e(CityActivity.class.getName(), "ERROR!!!: " + e.toString());
-			// t.setText("Exception " + e.toString());
-			//showToast("Error reading song info", false);
-		}
-
-		return false;
 	}
 
 	/** Reads the JSON about the channel **/
@@ -350,6 +266,9 @@ public class CityActivity extends FragmentActivity {
 	/** Allows the user to set the current station as a favorite **/
 	public void setFavoriteStation(View view) {
 		// TODO:
+		// Get the name
+		//view.get
+		
 		if (this._favoriteCheckbox.isChecked()) { // set as favorite
 			this._dataSource.createFavorite(Favorite.Type.STATION, this._selectedChannelName);
 		} else { // remove as favorite
@@ -358,103 +277,6 @@ public class CityActivity extends FragmentActivity {
 			f.setType(Favorite.Type.STATION);
 			this._dataSource.deleteFavorite(f);
 		}
-	}
-	
-	/** Searches for the song through the Android Market **/
-	public void searchAndroidMarket(View view) {
-		// parse song first
-		StringBuilder s = new StringBuilder(
-				"https://market.android.com/search?q=");// lady+gaga+born+this+way&c=music");
-		s = convertSongInfo(s);
-		s.append("&c=music");
-
-		// make sure it's valid
-		String url = s.toString();
-		if (url.length() == 0) {
-			showToast("No song currently selected", false);
-			return;
-		}
-
-		// now open it
-		this.openURL(url.toString());
-	}
-
-	/** Searches for the song through Amazon **/
-	public void searchAmazon(View view) {
-		// parse song first
-		StringBuilder s = new StringBuilder(
-				"http://www.amazon.com/s/url=search-alias=digital-music&field-keywords=");
-		s = convertSongInfo(s);
-
-		// make sure it's valid
-		String url = s.toString();
-		if (url.length() == 0) {
-			showToast("No song currently selected", false);
-			return;
-		}
-
-		// now open it
-		this.openURL(url.toString());
-	}
-
-	/** Searches for the song through Amazon **/
-	public void searchGrooveshark(View view) {
-		// parse song first
-		StringBuilder s = new StringBuilder(
-				"http://html5.grooveshark.com/#/search/");
-		s = convertSongInfo(s);
-
-		// make sure it's valid
-		String url = s.toString();
-		if (url.length() == 0) {
-			showToast("No song currently selected", false);
-			return;
-		}
-
-		// now open it
-		this.openURL(url.toString());
-	}
-
-	/** Searches for the song on Youtube **/
-	public void searchYoutube(View view) {
-		// parse song first
-		StringBuilder s = new StringBuilder(
-				"http://m.youtube.com/results?search_query=");
-		s = convertSongInfo(s);
-
-		// make sure it's valid
-		String url = s.toString();
-		if (url.length() == 0) {
-			showToast("No song currently selected", false);
-			return;
-		}
-
-		// now open it
-		this.openURL(url.toString());
-	}
-
-	/** Converts the song info into a useful URL format **/
-	// TODO: Do it once and store or do it all the time?
-	private StringBuilder convertSongInfo(StringBuilder s) {
-		String[] artist = this._currentArtist.split(" ");
-		String[] song = this._currentSong.split(" ");
-
-		for (int i = 0; i < artist.length; i++)
-			if (i != artist.length - 1)
-				s.append(artist[i] + "+");
-			else
-				s.append(artist[i]);
-
-		for (int i = 0; i < song.length; i++)
-			s.append("+" + song[i]);
-
-		return s;
-	}
-
-	/** Opens a URL Intent **/
-	private void openURL(String url) {
-		Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-		startActivity(i);
 	}
 
 	/** Helper method for showing a Toast notification **/
@@ -617,7 +439,7 @@ public class CityActivity extends FragmentActivity {
 					
 					// Populate the ListView
 					ListView lv = (ListView) findViewById(R.id._stationsList);
-					CustomArrayAdapter cadapter = new CustomArrayAdapter( // TODO: Not working for some reason
+					CustomArrayAdapter cadapter = new CustomArrayAdapter( 
 							CityActivity.this,
 							stations);
 		
@@ -659,83 +481,6 @@ public class CityActivity extends FragmentActivity {
 		}
 	}
 
-	/** End of AsyncTask class **/
-
-	/***
-	 * AsyncTask class for reading info about a station
-	 */
-	private class ReadSongTask extends AsyncTask<String, Void, Boolean> {
-		// The dialog bar to show indeterminate progress
-		private ProgressDialog dialog;
-		private Context theContext;
-
-		// constructor
-		public ReadSongTask(Activity activity) {
-			theContext = activity;
-			CityActivity.this.setProgressBarIndeterminate(true);
-			CityActivity.this.setProgressBarIndeterminateVisibility(true);
-			// start the progress dialog
-			dialog = new ProgressDialog(theContext);
-		}
-
-		@Override
-		protected Boolean doInBackground(String... params) {
-			// perform long running operation operation
-			// update the song
-			boolean update = updateCurrentSong(params[0]);
-			return update;
-		}
-
-		@Override
-		protected void onPostExecute(Boolean result) {
-			// execution of result of Long time consuming operation
-			// dismiss the dialog
-			dialog.dismiss();
-			String time = now.format("%H:%M");
-			_stationInfoTV.setText("Station: " + _selectedChannelName
-					+ "\n\tTime: " + time);
-			_currentArtistTV.setText("Artist:\n\t" + _currentArtist);
-			_currentSongTV.setText("Song:\n\t" + _currentSong);
-			
-			// Check if channel is already a favorite and update the star checkbox
-			// TODO: Make it more efficient so you don't have to check everytime
-			// TODO Temporary: We are currently getting all comments, but only get selected ones
-			List<Favorite> favorites = CityActivity.this._dataSource.getAllFavorites();
-			boolean isChecked = false;
-			for (int i = 0; i < favorites.size(); i++) {
-				if (favorites.get(i).getName().equals(_selectedChannelName)) { 
-					isChecked = true;
-					break;
-				}
-			}
-			
-			if (isChecked)
-				CityActivity.this._favoriteCheckbox.setChecked(true);
-			else
-				CityActivity.this._favoriteCheckbox.setChecked(false);
-			
-			CityActivity.this.setProgressBarIndeterminate(false);
-			CityActivity.this.setProgressBarIndeterminateVisibility(false);
-		}
-
-		@Override
-		protected void onPreExecute() {
-			// Things to be done before execution of long running operation. For
-			// example showing ProgessDialog
-
-			// set the properties of the progressdialog
-			// make sure it's indeterminate
-			this.dialog.setMessage("Loading station info");
-			this.dialog.setIndeterminate(true);
-			this.dialog.show();
-		}
-
-		@Override
-		protected void onProgressUpdate(Void... values) {
-			// Things to be done while execution of long running operation is in
-			// progress. For example updating ProgessDialog
-		}
-	}
 	/** End of AsyncTask class **/
 
 }
