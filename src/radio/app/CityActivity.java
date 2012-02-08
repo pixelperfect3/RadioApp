@@ -251,7 +251,9 @@ public class CityActivity extends FragmentActivity {
 
 			} else {
 				Log.e(CityActivity.class.toString(), "Failed to download file");
-				finish();
+				//showToast("Website seems to be down - please try again later.", false);
+				//finish();
+				return null;
 			}
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
@@ -267,7 +269,7 @@ public class CityActivity extends FragmentActivity {
 	public void setFavoriteStation(View view) {
 		// TODO:
 		// Get the name
-		//view.get
+		//TextView nameView = (TextView)view.get
 		
 		if (this._favoriteCheckbox.isChecked()) { // set as favorite
 			this._dataSource.createFavorite(Favorite.Type.STATION, this._selectedChannelName);
@@ -374,10 +376,12 @@ public class CityActivity extends FragmentActivity {
 		protected String[] doInBackground(String... params) {
 			// perform long running operation operation
 			// update the list of stations
-
 			String channelJSON = readJSON(_location, false);
 			Log.v(CityActivity.class.getName(), "channelJSON: " + channelJSON);
-
+			
+			if (channelJSON == null) // no info - probably server is down
+				return null;
+			
 			try {
 				// create the json object from the string
 				JSONObject jsonobj = new JSONObject(channelJSON);
@@ -457,8 +461,14 @@ public class CityActivity extends FragmentActivity {
 					    }
 					);*/
 				}
+				throw new Exception("");
 			} catch (Exception e) {
 				Log.e("Reading Stations", "Cannot execute AsyncTask");
+				
+				Context context = getApplicationContext();
+				int duration = Toast.LENGTH_LONG; // long
+				Toast toast = Toast.makeText(context, "Website seems to be down - please try again later.", duration);
+				toast.show();
 			}
 		}
 
