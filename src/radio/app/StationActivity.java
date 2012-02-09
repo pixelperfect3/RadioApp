@@ -457,25 +457,6 @@ public class StationActivity extends FragmentActivity {
 	/**********************
 	 * SEARCH SONG METHODS
 	 *********************/
-	
-	/** Searches for the song through the Android Market **/
-	public void searchAndroidMarket(View view) {
-		// parse song first
-		StringBuilder s = new StringBuilder(
-				"https://market.android.com/search?q=");// lady+gaga+born+this+way&c=music");
-		s = convertSongInfo(s);
-		s.append("&c=music");
-
-		// make sure it's valid
-		String url = s.toString();
-		if (url.length() == 0) {
-			showToast("No song currently selected", false);
-			return;
-		}
-
-		// now open it
-		this.openURL(url.toString());
-	}
 
 	/** Searches for the song through Amazon **/
 	
