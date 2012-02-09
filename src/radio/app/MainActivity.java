@@ -79,7 +79,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		// No Title - Temporary TODO
-		// requestWindowFeature(Window.FEATURE_NO_TITLE);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
 		// set the custom title
 		// setCustomTitle();

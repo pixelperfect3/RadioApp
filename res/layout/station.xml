@@ -33,13 +33,13 @@
 						android:layout_width="wrap_content" android:layout_toRightOf="@+id/_amazonButton"
 						android:background="@drawable/grooveshark" android:onClick="searchGrooveshark"
 						android:layout_marginLeft="20dip" />
-					<ImageButton android:layout_height="wrap_content"
+					<!--  <ImageButton android:layout_height="wrap_content"
 						android:id="@+id/_androidMarketButton" android:layout_width="wrap_content"
 						android:layout_toRightOf="@+id/_gsButton" android:background="@drawable/android_market"
-						android:onClick="searchAndroidMarket" android:layout_marginLeft="20dip" />
+						android:onClick="searchAndroidMarket" android:layout_marginLeft="20dip" /> -->
 					<ImageButton android:layout_height="wrap_content"
 						android:id="@+id/_youtubeButton" android:layout_width="wrap_content"
-						android:layout_toRightOf="@+id/_androidMarketButton"
+						android:layout_toRightOf="@+id/_gsButton"
 						android:background="@drawable/youtube" android:onClick="searchYoutube"
 						android:layout_marginLeft="20dip" />
 				</RelativeLayout>

@@ -108,7 +108,7 @@ public class CityActivity extends FragmentActivity {
 		// get the city from the Bundle passed in
 		String city = getIntent().getExtras().getString("CITY_NAME");
 		if (city != null) {
-			_location = city.toUpperCase();
+			_location = city.trim();
 			this._locationTV = (TextView) findViewById(R.id._location);
 			this._locationTV.setText(_location);
 		}
@@ -149,7 +149,8 @@ public class CityActivity extends FragmentActivity {
 		if (_settings.contains("DEFAULT")) { // Default City Stored
 			String defaultCity = _settings.getString("DEFAULT", "");
 			// if city is the same as the default city, set it to checked
-			if (city.equalsIgnoreCase(defaultCity))
+			// TODO: Also check for numbers (Zipcode)
+			if (_location.equalsIgnoreCase(defaultCity.trim())) // TODO: Not working for some reason
 				_defaultCityCheckbox.setChecked(true);
 		}
 
