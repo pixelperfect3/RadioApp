@@ -3,7 +3,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@drawable/tile_background"
     android:orientation="vertical"
     android:tileMode="repeat" >
 
@@ -24,7 +23,6 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dip"
             android:text="@string/app_name"
-            android:textColor="#FFFFFF"
             android:textSize="25sp"
             android:typeface="serif" />
 
@@ -73,8 +71,8 @@
             android:layout_below="@id/linearLayout2"
             android:layout_marginTop="5dp"
             android:gravity="center"
-            android:text="@string/searchText"
-            android:textColor="#CFCFCF" />
+            android:text="@string/searchText" />
+            <!-- android:textColor="#CFCFCF" -->
     </RelativeLayout>
 
     <LinearLayout
@@ -91,7 +89,6 @@
             android:layout_height="wrap_content"
             android:paddingLeft="20dp"
             android:text="@string/favorites"
-            android:textColor="#FFFFFF"
             android:textSize="18sp"
             android:typeface="serif" />
 

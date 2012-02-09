@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
+import radio.app.CityActivity.MyOnItemClickListener;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -51,11 +53,14 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 public class MainActivity extends Activity {
 	
-	/** PROPERTIES **/
+	/******************
+	 * PROPERTIES
+	 ******************/
 	private EditText _searchText;  											// Search text box
 	public static final String PREFERENCE_FILENAME = "RadioAppPreferences"; // Shared preferences name
 	private ListView _favoritesLV; 											// ListView for showing favorites
@@ -64,8 +69,9 @@ public class MainActivity extends Activity {
 	private LocationManager locationManager;
 	private double _latitude, _longitude;
 	
-	
-	/** METHODS **/
+	/****************************************************
+	 * METHODS FOR CREATING, PAUSING, RESUMING, DESTROYING
+	 ***************************************************/
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -128,12 +134,9 @@ public class MainActivity extends Activity {
 			search(defaultCity);
 
 		}
-
-		
-		
 	} // End of OnCreate
 
-	/** onPause and onResume methods **/
+	/** onPause, onResume  and onDestroy methods **/
 	@Override
 	protected void onResume() {
 		_dataSource.open();
@@ -148,8 +151,17 @@ public class MainActivity extends Activity {
 		super.onPause();
 	}
 	
+	@Override
+	protected void onDestroy() {
+		_dataSource.close();
+		super.onDestroy();
+	}
+	
+	/**********************************
+	 * METHODS FOR HANDLING FAVORITE STATIONS
+	 *********************************/
+	
 	/** Updates the favorites list **/
-	// TODO: Should also be called on onResume()?
 	private void updateFavorites() {
 		// get all the favorites
 		List<Favorite> values = _dataSource.getAllFavorites();
@@ -161,19 +173,39 @@ public class MainActivity extends Activity {
 		_favoritesLV.setAdapter(adapter);
 		
 		// now set the listview to listen for changes
-		_favoritesLV.setOnItemSelectedListener(new FavoriteSelectedListener());
+		_favoritesLV.setOnItemClickListener(new MyOnItemClickListener());
+		//_favoritesLV.setOnItemSelectedListener(new FavoriteSelectedListener());
+	}
+	
+	/** Allows the user to unfavorite a station **/
+	public void setFavoriteStation(View view) {
+		// TODO:
+		// Convert to 
+		TextView nameView = (TextView)view;
+		/*
+		if (this._favoriteCheckbox.isChecked()) { // set as favorite
+			this._dataSource.createFavorite(Favorite.Type.STATION, this._selectedChannelName);
+		} else { // remove as favorite
+			Favorite f = new Favorite();
+			f.setName(this._selectedChannelName);
+			f.setType(Favorite.Type.STATION);
+			this._dataSource.deleteFavorite(f);
+		}*/
+		
+		// refresh
+		this.updateFavorites();
 	}
 	
 	/** Inner class used just for listening to the Favorites ListView **/
-	public class FavoriteSelectedListener implements OnItemSelectedListener {
+	public class MyOnItemClickListener implements OnItemClickListener {
 
-		// When item selected should start a StationActivity (or song activity?)
-		public void onItemSelected(AdapterView<?> parent, View view, int pos,
+		// When item selected start new station activity
+		public void onItemClick(AdapterView<?> parent, View view, int pos,
 				long id) {
 			
 			// Get the selected favorite
 			Favorite fave = (Favorite)parent.getItemAtPosition(pos);
-			
+			Log.i("Selected FavoriteArrayAdapter:", fave.getName());
 			// TODO: start the station activity
 			Intent intent = new Intent(MainActivity.this, StationActivity.class);//RadioApp.class);
 
@@ -184,13 +216,11 @@ public class MainActivity extends Activity {
 			MainActivity.this.startActivity(intent); 
 			
 		}
-
-		@Override
-		public void onNothingSelected(AdapterView<?> arg0) {
-			// TODO Auto-generated method stub
-			
-		}
 	}
+	
+	/************************
+	 * METHODS FOR SEARCHING
+	 ***********************/
 	
 	/** Method called when search button is pressed **/
 	public void startSearch(View v) {
@@ -210,6 +240,7 @@ public class MainActivity extends Activity {
 	/** Method called when gps search button is pressed **/
 	public void searchByGPS(View v) {
 		/*****
+		 * TODO
 		 * TEMPORARY: Convert Latitude/Longitude to city
 		 */
 		// get the latitude/longitude
@@ -266,9 +297,15 @@ public class MainActivity extends Activity {
 		intent.putExtras(parameters);
 
 		this.startActivity(intent);
+		//this.onPause();
 	}
 
-	// For a custom title at the top
+	
+	/*************************************
+	 * HELPER METHODS
+	 ************************************/
+
+	/** For a custom title at the top **/
 	private void setCustomTitle() {
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		// custom title
@@ -281,11 +318,7 @@ public class MainActivity extends Activity {
 		title.setText("Search");
 		icon.setImageResource(R.drawable.icon);
 	}
-
-	/*************************************
-	 * HELPER METHODS
-	 ************************************/
-
+	
 	/** Checks if internet connection is available **/
 	private boolean isNetworkAvailable() {
 		ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);

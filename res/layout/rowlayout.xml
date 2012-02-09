@@ -25,7 +25,6 @@
         android:layout_marginTop="8dp"
         android:layout_toRightOf="@id/_favoriteStar"
         android:text=""
-        android:textColor="#FFFFFF"
         android:textSize="20dp" android:focusable="false" android:focusableInTouchMode="false"/>
 
     <TextView
@@ -36,7 +35,6 @@
         android:layout_marginTop="8dp"
         android:layout_toRightOf="@id/_stationName1"
         android:text=""
-        android:textColor="#FFFFFF"
         android:textSize="12dp" android:focusable="false" android:focusableInTouchMode="false" />
 
 </RelativeLayout>

@@ -8,9 +8,6 @@
 package radio.app;
 
 import java.util.List;
-
-import radio.app.CustomArrayAdapter.ViewHolder;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;

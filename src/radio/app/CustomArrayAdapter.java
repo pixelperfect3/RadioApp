@@ -10,7 +10,6 @@ package radio.app;
 import java.util.List;
 
 import android.content.Context;
-import android.support.v4.view.MenuItem;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,8 +33,9 @@ public class CustomArrayAdapter extends ArrayAdapter<String> {
 		
 		/** Open the favorites database **/
 		_dataSource = new FavoritesDataSource(context);
-		_dataSource.open();
+		/*_dataSource.open();
 		favorites = this._dataSource.getAllFavorites();
+		_dataSource.close();*/
 	}
 	
 	static class ViewHolder {
@@ -74,6 +74,9 @@ public class CustomArrayAdapter extends ArrayAdapter<String> {
 			viewHolder.text2.setText(pieces[1]);
 
 		// Star to show if station is favorited or not
+		_dataSource.open();
+		favorites = this._dataSource.getAllFavorites();
+		_dataSource.close();
 		boolean isChecked = false;
 		for (int i = 0; i < favorites.size(); i++) {
 			if (favorites.get(i).getName().contains(pieces[0])) { 

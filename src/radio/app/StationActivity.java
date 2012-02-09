@@ -1,4 +1,5 @@
 package radio.app;
+
 /**
  * This Activity shows information about a selected station 
  * 
@@ -30,14 +31,13 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-//import com.actionbarsherlock.sample.styledactionbar.R;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -57,8 +57,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class StationActivity extends FragmentActivity {
-	/** PROPERTIES **/
-	
+
+	/******************
+	 * PROPERTIES
+	 ******************/
+
 	// The context
 	Context context;
 
@@ -71,7 +74,7 @@ public class StationActivity extends FragmentActivity {
 	// The TextViews
 	TextView _stationInfoTV, _currentArtistTV, _currentSongTV;
 
-	// Checkbox (star) for favoriting 
+	// Checkbox (star) for favoriting
 	CheckBox _favoriteCheckbox;
 
 	// Time
@@ -79,8 +82,11 @@ public class StationActivity extends FragmentActivity {
 
 	// Database for storing favorites
 	private FavoritesDataSource _dataSource;
-	
-	
+
+	/****************************************************
+	 * METHODS FOR CREATING, PAUSING, RESUMING, DESTROYING
+	 ***************************************************/
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -92,13 +98,13 @@ public class StationActivity extends FragmentActivity {
 		// get the text views
 		this._currentArtistTV = (TextView) findViewById(R.id._currentArtistTV);
 		this._currentSongTV = (TextView) findViewById(R.id._currentSongTV);
-		
+
 		// favorite checkbox
-		this._favoriteCheckbox = (CheckBox)findViewById(R.id._favoriteCheckbox);
-		
+		this._favoriteCheckbox = (CheckBox) findViewById(R.id._favoriteCheckbox);
+
 		// get the station from the Bundle passed in
 		_stationName = getIntent().getExtras().getString("STATION_NAME");
-		
+
 		// extract the first four letters for the channel name
 		String[] split = this._stationName.split(" ");
 		_selectedChannelName = split[0];
@@ -106,14 +112,17 @@ public class StationActivity extends FragmentActivity {
 		// Action Bar! (From ActionBarSherlock)
 		final ActionBar ab = getSupportActionBar();
 		ab.setTitle(_stationName);
-		ab.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD); // standard navigation
-		//ab.setDisplayHomeAsUpEnabled(true);
+		ab.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD); // standard
+																	// navigation
+		// ab.setDisplayHomeAsUpEnabled(true);
 		ab.setDisplayShowHomeEnabled(false);
-		
+
 		// background
-		//ab.setBackgroundDrawable(android.R.color.primary_text_dark);
-		//getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.ad_action_bar_gradient_bak));
-		
+		ab.setBackgroundDrawable(new ColorDrawable(
+				android.R.color.primary_text_dark));// getResources().getDrawable(R.drawable.ad_action_bar_gradient_bak));
+		// ab.setBackgroundDrawable(android.R.color.primary_text_dark);
+		// getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.ad_action_bar_gradient_bak));
+
 		// Check if internet connection is available
 		if (!isNetworkAvailable()) {
 			showToast("No internet connection!", true);
@@ -124,14 +133,12 @@ public class StationActivity extends FragmentActivity {
 		/** Open the favorites database **/
 		_dataSource = new FavoritesDataSource(this);
 		_dataSource.open();
-		
+
 		// the Time object
 		now = new Time();
 
-		
-		
 		// Try to read the JSON information and read the current song
-		
+
 		Log.e("SELECTED CHANNEL2:", this._selectedChannelName);
 		if (this._selectedChannelName != "") {
 			AsyncTask<String, Void, Boolean> readTask = new ReadSongTask(this)
@@ -155,67 +162,79 @@ public class StationActivity extends FragmentActivity {
 		_dataSource.close();
 		super.onPause();
 	}
-	
+
+	@Override
+	protected void onDestroy() {
+		_dataSource.close();
+		super.onDestroy();
+	}
+
+	/************************
+	 * ACTION BAR METHODS
+	 ***********************/
+
 	/** Action Bar items (loaded as menu items) **/
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.layout.station_header, menu);
-		
+
 		// Check if channel is already a favorite and update the star checkbox
 		// TODO: Make it more efficient so you don't have to check everytime
-		// TODO Temporary: We are currently getting all comments, but only get selected ones
+		// TODO Temporary: We are currently getting all comments, but only get
+		// selected ones
 		List<Favorite> favorites = this._dataSource.getAllFavorites();
 		boolean isChecked = false;
 		for (int i = 0; i < favorites.size(); i++) {
-			if (favorites.get(i).getName().equals(_stationName)) { 
+			if (favorites.get(i).getName().equals(_stationName)) {
 				isChecked = true;
 				break;
 			}
 		}
-		
+
 		MenuItem item = menu.getItem(1);
-		
+
 		if (isChecked) {
 			item.setChecked(true);
 			item.setIcon(android.R.drawable.btn_star_big_on);
-		}
-		else {
+		} else {
 			item.setChecked(false);
 			item.setIcon(android.R.drawable.btn_star_big_off);
 		}
-		
+
 		return super.onCreateOptionsMenu(menu);
 	}
-	
-	// selecting menu items
+
+	/** selecting menu items **/
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-			case R.id.ab_refresh:		// refresh the song
-				this.refresh(null);
-				return true;
-			case R.id.ab_search:		// perform a new search
-				// TODO:
-				// Look at performing new search
-				return true;
-			case R.id.ab_favorite:
-				// TODO: Implement favoriting a station
-				// change the star icon appropriately
-				item.setChecked(!item.isChecked());
-				if (item.isChecked()) {
-					item.setIcon(android.R.drawable.btn_star_big_on);
-					this.setFavoriteStation(true);
-				}
-				else {
-					item.setIcon(android.R.drawable.btn_star_big_off);
-					this.setFavoriteStation(false);
-				}
-				return true;
-			default:
-				return super.onOptionsItemSelected(item);
+		case R.id.ab_refresh: // refresh the song
+			this.refresh(null);
+			return true;
+		case R.id.ab_search: // perform a new search
+			// TODO:
+			// Look at performing new search
+			return true;
+		case R.id.ab_favorite:
+			// TODO: Implement favoriting a station
+			// change the star icon appropriately
+			item.setChecked(!item.isChecked());
+			if (item.isChecked()) {
+				item.setIcon(android.R.drawable.btn_star_big_on);
+				this.setFavoriteStation(true);
+			} else {
+				item.setIcon(android.R.drawable.btn_star_big_off);
+				this.setFavoriteStation(false);
+			}
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
 		}
 	}
-	
+
+	/************************
+	 * STATION METHODS
+	 ************************/
 	
 	/** Updates the current song via button click **/
 	public void refresh(View view) {
@@ -242,7 +261,7 @@ public class StationActivity extends FragmentActivity {
 			JSONArray jsonArray = new JSONArray(readJSONFeed);
 			if (jsonArray.length() < 1) // nothing read
 				return false;
-			
+
 			// get the first object which has all the info
 			JSONObject firstJson = jsonArray.getJSONObject(0);
 
@@ -268,9 +287,10 @@ public class StationActivity extends FragmentActivity {
 		} catch (Exception e) {
 			e.printStackTrace();
 			Log.e(StationActivity.class.getName(), "ERROR!!!: " + e.toString());
-			//this.showToast("Nothing playing on this station right now", false);
+			// this.showToast("Nothing playing on this station right now",
+			// false);
 			// t.setText("Exception " + e.toString());
-			//showToast("Error reading song info", false);
+			// showToast("Error reading song info", false);
 		}
 
 		return false;
@@ -311,11 +331,12 @@ public class StationActivity extends FragmentActivity {
 					builder.append(line);
 				}
 
-				Log.e(StationActivity.class.toString(),
-						"RESPONSE BUILT: " + builder.toString());
+				Log.e(StationActivity.class.toString(), "RESPONSE BUILT: "
+						+ builder.toString());
 
 			} else {
-				Log.e(StationActivity.class.toString(), "Failed to download file");
+				Log.e(StationActivity.class.toString(),
+						"Failed to download file");
 				finish();
 			}
 		} catch (ClientProtocolException e) {
@@ -331,10 +352,11 @@ public class StationActivity extends FragmentActivity {
 	}
 
 	/** Allows the user to set the current station as a favorite **/
-	public void setFavoriteStation(boolean setFavorite) {//View view) {
+	public void setFavoriteStation(boolean setFavorite) {// View view) {
 		// TODO:
 		if (setFavorite) { // set as favorite
-			this._dataSource.createFavorite(Favorite.Type.STATION, this._stationName);
+			this._dataSource.createFavorite(Favorite.Type.STATION,
+					this._stationName);
 			this.showToast(this._stationName + " added as a favorite", true);
 		} else { // remove as favorite
 			Favorite f = new Favorite();
@@ -344,6 +366,97 @@ public class StationActivity extends FragmentActivity {
 			this.showToast(this._stationName + " removed as a favorite", true);
 		}
 	}
+
+	/** Inner class used just for listening to the Spinner **/
+	public class MyOnItemSelectedListener implements OnItemSelectedListener {
+	
+		// When item selected
+		// Should update the name if it's different from the current one and
+		// then refresh the song name
+		public void onItemSelected(AdapterView<?> parent, View view, int pos,
+				long id) {
+			// Get the selected station
+	
+			_selectedChannelName = parent.getItemAtPosition(pos).toString();
+	
+			@SuppressWarnings("unused")
+			AsyncTask<String, Void, Boolean> readTask = new ReadSongTask(
+					StationActivity.this).execute(_selectedChannelName);// updateCurrentSong(_selectedChannelName);
+	
+		}
+	
+		public void onNothingSelected(AdapterView<?> parent) {
+			// Do nothing.
+		}
+	}
+	
+	/***
+	 * AsyncTask class for reading info about a station
+	 */
+	private class ReadSongTask extends AsyncTask<String, Void, Boolean> {
+		// The dialog bar to show indeterminate progress
+		private ProgressDialog dialog;
+		private Context theContext;
+	
+		// constructor
+		public ReadSongTask(Activity activity) {
+			theContext = activity;
+			StationActivity.this.setProgressBarIndeterminate(true);
+			StationActivity.this.setProgressBarIndeterminateVisibility(true);
+			// start the progress dialog
+			dialog = new ProgressDialog(theContext);
+		}
+	
+		@Override
+		protected Boolean doInBackground(String... params) {
+			// perform long running operation operation
+			// update the song
+			boolean update = updateCurrentSong(params[0]);
+			return update;
+		}
+	
+		@Override
+		protected void onPostExecute(Boolean result) {
+			// execution of result of Long time consuming operation
+			// dismiss the dialog
+			dialog.dismiss();
+			String time = now.format("%H:%M");
+			/*
+			 * _stationInfoTV.setText("Station: " + _selectedChannelName +
+			 * "\n\tTime: " + time);
+			 */
+			if (result) {
+				_currentArtistTV.setText("Artist:\n\t" + _currentArtist);
+				_currentSongTV.setText("Song:\n\t" + _currentSong);
+			} else
+				// no response
+				StationActivity.this.showToast(
+						"Nothing playing on this station right now", true);
+	
+		}
+	
+		@Override
+		protected void onPreExecute() {
+			// Things to be done before execution of long running operation. For
+			// example showing ProgessDialog
+	
+			// set the properties of the progressdialog
+			// make sure it's indeterminate
+			this.dialog.setMessage("Loading station info");
+			this.dialog.setIndeterminate(true);
+			this.dialog.show();
+		}
+	
+		@Override
+		protected void onProgressUpdate(Void... values) {
+			// Things to be done while execution of long running operation is in
+			// progress. For example updating ProgessDialog
+		}
+	}
+
+	/**********************
+	 * SEARCH SONG METHODS
+	 *********************/
 	
 	/** Searches for the song through the Android Market **/
 	public void searchAndroidMarket(View view) {
@@ -365,6 +478,7 @@ public class StationActivity extends FragmentActivity {
 	}
 
 	/** Searches for the song through Amazon **/
+	
 	public void searchAmazon(View view) {
 		// parse song first
 		StringBuilder s = new StringBuilder(
@@ -383,6 +497,7 @@ public class StationActivity extends FragmentActivity {
 	}
 
 	/** Searches for the song through Amazon **/
+	
 	public void searchGrooveshark(View view) {
 		// parse song first
 		StringBuilder s = new StringBuilder(
@@ -401,6 +516,7 @@ public class StationActivity extends FragmentActivity {
 	}
 
 	/** Searches for the song on Youtube **/
+	
 	public void searchYoutube(View view) {
 		// parse song first
 		StringBuilder s = new StringBuilder(
@@ -435,6 +551,7 @@ public class StationActivity extends FragmentActivity {
 
 		return s;
 	}
+	
 
 	/** Opens a URL Intent **/
 	private void openURL(String url) {
@@ -442,12 +559,16 @@ public class StationActivity extends FragmentActivity {
 		startActivity(i);
 	}
 
+	/******************
+	 * HELPER METHODS
+	 *****************/
+
 	/** Helper method for showing a Toast notification **/
 	private void showToast(CharSequence text, boolean timeShort) {
 		Context context = getApplicationContext();
 		int duration = timeShort ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG; // long
-																			// or
-																			// short?
+		// or
+		// short?
 
 		Toast toast = Toast.makeText(context, text, duration);
 		toast.show();
@@ -475,35 +596,14 @@ public class StationActivity extends FragmentActivity {
 	}
 
 	/** Checks if internet connection is available **/
+
 	private boolean isNetworkAvailable() {
 		ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo activeNetworkInfo = connectivityManager
 				.getActiveNetworkInfo();
 		return activeNetworkInfo != null;
 	}
-
-	/** Inner class used just for listening to the Spinner **/
-	public class MyOnItemSelectedListener implements OnItemSelectedListener {
-
-		// When item selected
-		// Should update the name if it's different from the current one and
-		// then refresh the song name
-		public void onItemSelected(AdapterView<?> parent, View view, int pos,
-				long id) {
-			// Get the selected station
-
-			_selectedChannelName = parent.getItemAtPosition(pos).toString();
-
-			@SuppressWarnings("unused")
-			AsyncTask<String, Void, Boolean> readTask = new ReadSongTask(
-					StationActivity.this).execute(_selectedChannelName);// updateCurrentSong(_selectedChannelName);
-			
-		}
-
-		public void onNothingSelected(AdapterView<?> parent) {
-			// Do nothing.
-		}
-	}
+	
 
 	// Formats the HTML Strings properly
 	// TODO: (&lt; &gt;)?
@@ -514,69 +614,5 @@ public class StationActivity extends FragmentActivity {
 
 		return proper;
 	}
-
-	/** End of AsyncTask class **/
-
-	/***
-	 * AsyncTask class for reading info about a station
-	 */
-	private class ReadSongTask extends AsyncTask<String, Void, Boolean> {
-		// The dialog bar to show indeterminate progress
-		private ProgressDialog dialog;
-		private Context theContext;
-
-		// constructor
-		public ReadSongTask(Activity activity) {
-			theContext = activity;
-			StationActivity.this.setProgressBarIndeterminate(true);
-			StationActivity.this.setProgressBarIndeterminateVisibility(true);
-			// start the progress dialog
-			dialog = new ProgressDialog(theContext);
-		}
-
-		@Override
-		protected Boolean doInBackground(String... params) {
-			// perform long running operation operation
-			// update the song
-			boolean update = updateCurrentSong(params[0]);
-			return update;
-		}
-
-		@Override
-		protected void onPostExecute(Boolean result) {
-			// execution of result of Long time consuming operation
-			// dismiss the dialog
-			dialog.dismiss();
-			String time = now.format("%H:%M");
-			/*_stationInfoTV.setText("Station: " + _selectedChannelName
-					+ "\n\tTime: " + time);*/
-			if (result) {
-			_currentArtistTV.setText("Artist:\n\t" + _currentArtist);
-			_currentSongTV.setText("Song:\n\t" + _currentSong);
-			}
-			else // no response 
-				StationActivity.this.showToast("Nothing playing on this station right now", true);
-			
-		}
-
-		@Override
-		protected void onPreExecute() {
-			// Things to be done before execution of long running operation. For
-			// example showing ProgessDialog
-
-			// set the properties of the progressdialog
-			// make sure it's indeterminate
-			this.dialog.setMessage("Loading station info");
-			this.dialog.setIndeterminate(true);
-			this.dialog.show();
-		}
-
-		@Override
-		protected void onProgressUpdate(Void... values) {
-			// Things to be done while execution of long running operation is in
-			// progress. For example updating ProgessDialog
-		}
-	}
-	/** End of AsyncTask class **/
 
 }

@@ -14,6 +14,11 @@
     -For list of stations, make sure you show which are already favorited
     -Implement favoriting/unfavoriting a station
  
+    TODO BUG:
+    -When going back to MainActivity and then searching by location, not setting the default checkbox
+    (Probably because it's not uppercase)
+    
+ 
  */
 
 package radio.app;
@@ -40,6 +45,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -59,7 +65,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class CityActivity extends FragmentActivity {
-	/** PROPERTIES **/
+	
+	/******************
+	 * PROPERTIES
+	 ******************/
 	
 	// The context
 	Context context;
@@ -84,6 +93,9 @@ public class CityActivity extends FragmentActivity {
 	// Database for storing favorites
 	private FavoritesDataSource _dataSource;
 	
+	/****************************************************
+	 * METHODS FOR CREATING, PAUSING, RESUMING, DESTROYING
+	 ***************************************************/
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -106,7 +118,8 @@ public class CityActivity extends FragmentActivity {
 		ab.setTitle(city);
 		ab.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD); // standard navigation
 		// background
-		//ab.setBackgroundDrawable(android.R.color.primary_text_dark);
+		ab.setBackgroundDrawable(new ColorDrawable(android.R.color.primary_text_dark));//getResources().getDrawable(R.drawable.ad_action_bar_gradient_bak));
+		
 		//getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.ad_action_bar_gradient_bak));
 		
 		// Check if internet connection is available
@@ -120,9 +133,9 @@ public class CityActivity extends FragmentActivity {
 		_dataSource.open();
 		
 		/** Setup the ListView by populating it with the list of radio stations **/
-		// read the list of stations in an asynctask
-		AsyncTask<String, Void, String[]> readStationsTask = new ReadStationsTask(
-				this).execute();
+		// TODO: For some reason not necessary to call here - is it because onResume() gets called automatically?
+		/*AsyncTask<String, Void, String[]> readStationsTask = new ReadStationsTask(
+				this).execute(); */
 
 		Log.v("CHANNELS LOADED:", this._selectedChannelName);
 		// the Time object
@@ -146,6 +159,8 @@ public class CityActivity extends FragmentActivity {
 	@Override
 	protected void onResume() {
 		_dataSource.open();
+		// refresh the stations
+		refresh();
 		super.onResume();
 	}
 
@@ -155,6 +170,16 @@ public class CityActivity extends FragmentActivity {
 		super.onPause();
 	}
 	
+	@Override
+	protected void onDestroy() {
+		_dataSource.close();
+		super.onDestroy();
+	}
+	
+	/************************
+	 * ACTION BAR METHODS
+	 ***********************/
+	
 	/** Action Bar items (loaded as menu items) **/
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -163,12 +188,12 @@ public class CityActivity extends FragmentActivity {
 		return super.onCreateOptionsMenu(menu);
 	}
 	
-	// selecting menu items
+	/** Selecting Action Bar items **/
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.ab_refresh:		// refresh the song
-				this.refresh(null);
+				this.refresh();
 				return true;
 			case R.id.ab_search:		// perform a new search
 				// TODO:
@@ -180,23 +205,10 @@ public class CityActivity extends FragmentActivity {
 	}
 	
 	
-	/** Updates the current song via button click **/
-	public void refresh(View view) {
-		// progress bar
-		CityActivity.this.setProgressBarIndeterminate(true);
-		CityActivity.this.setProgressBarIndeterminateVisibility(true);
-
-		if (!isNetworkAvailable()) {
-			// Alert!
-			showDialog("No Internet Connection! Enable WiFi or 3G");
-			return;
-		}
-
-		// Try to read the JSON information and then update the TextView
-		/*AsyncTask readTask = new ReadSongTask(this)
-				.execute(_selectedChannelName);// updateCurrentSong(_selectedChannelName); */
-	}
-
+	/************************
+	 * STATION METHODS
+	 ************************/
+	
 	/** Updates the default city via the check box **/
 	public void setDefaultCity(View view) {
 		SharedPreferences.Editor prefEditor = _settings.edit();
@@ -210,59 +222,22 @@ public class CityActivity extends FragmentActivity {
 			prefEditor.commit();
 		}
 	}
+	
+	/** Updates the current song via button click **/
+	public void refresh() {
+		// progress bar
+		CityActivity.this.setProgressBarIndeterminate(true);
+		CityActivity.this.setProgressBarIndeterminateVisibility(true);
 
-	/** Reads the JSON about the channel **/
-	public String readJSON(String info, boolean station) {
-		// Format the info properly (for city)
-		info = info.trim();
-		// replace spaces with proper html?
-		info = info.replaceAll(" ", "&nbsp;");
-
-		StringBuilder builder = new StringBuilder();
-
-		// Create a HTTPClient
-		HttpClient client = new DefaultHttpClient();
-
-		// Open a GET connection to the Yes.com api
-		HttpGet httpGet;
-		if (station) {
-			httpGet = new HttpGet("http://api.yes.com/1/station?name=" + info);
-		} else { // get list of stations instead for the provided city/zipcode
-			httpGet = new HttpGet("http://api.yes.com/1/stations?loc=" + info);
+		if (!isNetworkAvailable()) {
+			// Alert!
+			showDialog("No Internet Connection! Enable WiFi or 3G");
+			return;
 		}
 
-		try {
-			// Read all the lines one-by-one
-			HttpResponse response = client.execute(httpGet);
-			StatusLine statusLine = response.getStatusLine();
-			int statusCode = statusLine.getStatusCode();
-			if (statusCode == 200) {
-				HttpEntity entity = response.getEntity();
-				InputStream content = entity.getContent();
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(content));
-				String line;
-				while ((line = reader.readLine()) != null) {
-					builder.append(line);
-				}
-
-				Log.e(CityActivity.class.toString(),
-						"RESPONSE BUILT: " + builder.toString());
-
-			} else {
-				Log.e(CityActivity.class.toString(), "Failed to download file");
-				//showToast("Website seems to be down - please try again later.", false);
-				//finish();
-				return null;
-			}
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-			this._stationInfoTV.setText("Exception " + e.toString());
-		} catch (IOException e) {
-			e.printStackTrace();
-			this._stationInfoTV.setText("Exception " + e.toString());
-		}
-		return builder.toString();
+		/** Setup the ListView by populating it with the list of radio stations **/
+		AsyncTask<String, Void, String[]> readStationsTask = new ReadStationsTask(
+				this).execute();
 	}
 
 	/** Allows the user to set the current station as a favorite **/
@@ -271,54 +246,14 @@ public class CityActivity extends FragmentActivity {
 		// Get the name
 		//TextView nameView = (TextView)view.get
 		
-		if (this._favoriteCheckbox.isChecked()) { // set as favorite
+		/*if (this._favoriteCheckbox.isChecked()) { // set as favorite
 			this._dataSource.createFavorite(Favorite.Type.STATION, this._selectedChannelName);
 		} else { // remove as favorite
 			Favorite f = new Favorite();
 			f.setName(this._selectedChannelName);
 			f.setType(Favorite.Type.STATION);
 			this._dataSource.deleteFavorite(f);
-		}
-	}
-
-	/** Helper method for showing a Toast notification **/
-	private void showToast(CharSequence text, boolean timeShort) {
-		Context context = getApplicationContext();
-		int duration = timeShort ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG; // long
-																			// or
-																			// short?
-
-		Toast toast = Toast.makeText(context, text, duration);
-		toast.show();
-	}
-
-	/** Creates an alert dialog **/
-	private void showDialog(CharSequence text) {
-		// build a dialog
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		// set the message
-		builder.setMessage(text).setCancelable(false)
-		/*
-		 * .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-		 * public void onClick(DialogInterface dialog, int id) {
-		 * MyActivity.this.finish(); } })
-		 */
-		// set only the negative button
-				.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialog.cancel();
-					}
-				});
-		AlertDialog alert = builder.create();
-		alert.show();
-	}
-
-	/** Checks if internet connection is available **/
-	private boolean isNetworkAvailable() {
-		ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo activeNetworkInfo = connectivityManager
-				.getActiveNetworkInfo();
-		return activeNetworkInfo != null;
+		}*/
 	}
 
 	/** Inner class used just for listening to the ListView **/
@@ -339,20 +274,60 @@ public class CityActivity extends FragmentActivity {
 
 			CityActivity.this.startActivity(intent); 
 		}
-
-		public void onNothingSelected(AdapterView<?> parent) {
-			// Do nothing.
-		}
 	}
 
-	// Formats the HTML Strings properly
-	// TODO: (&lt; &gt;)?
-	private String properFormat(String str) {
-		String proper = str.replaceAll("&amp;", "&");
-		proper = proper.replaceAll("&quot;", "\"");
-		proper = proper.replaceAll("&apos;", "\'");
-
-		return proper;
+	/** Reads the JSON about the channel **/
+	public String readJSON(String info, boolean station) {
+		// Format the info properly (for city)
+		info = info.trim();
+		// replace spaces with proper html?
+		info = info.replaceAll(" ", "&nbsp;");
+	
+		StringBuilder builder = new StringBuilder();
+	
+		// Create a HTTPClient
+		HttpClient client = new DefaultHttpClient();
+	
+		// Open a GET connection to the Yes.com api
+		HttpGet httpGet;
+		if (station) {
+			httpGet = new HttpGet("http://api.yes.com/1/station?name=" + info);
+		} else { // get list of stations instead for the provided city/zipcode
+			httpGet = new HttpGet("http://api.yes.com/1/stations?loc=" + info);
+		}
+	
+		try {
+			// Read all the lines one-by-one
+			HttpResponse response = client.execute(httpGet);
+			StatusLine statusLine = response.getStatusLine();
+			int statusCode = statusLine.getStatusCode();
+			if (statusCode == 200) {
+				HttpEntity entity = response.getEntity();
+				InputStream content = entity.getContent();
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(content));
+				String line;
+				while ((line = reader.readLine()) != null) {
+					builder.append(line);
+				}
+	
+				Log.e(CityActivity.class.toString(),
+						"RESPONSE BUILT: " + builder.toString());
+	
+			} else {
+				Log.e(CityActivity.class.toString(), "Failed to download file");
+				//showToast("Website seems to be down - please try again later.", false);
+				//finish();
+				return null;
+			}
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+			this._stationInfoTV.setText("Exception " + e.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
+			this._stationInfoTV.setText("Exception " + e.toString());
+		}
+		return builder.toString();
 	}
 
 	/***
@@ -461,9 +436,10 @@ public class CityActivity extends FragmentActivity {
 					    }
 					);*/
 				}
-				throw new Exception("");
+				else 
+					throw new Exception("");
 			} catch (Exception e) {
-				Log.e("Reading Stations", "Cannot execute AsyncTask");
+				Log.e("Reading Stations", "Cannot execute AsyncTask: " + e.toString());
 				
 				Context context = getApplicationContext();
 				int duration = Toast.LENGTH_LONG; // long
@@ -489,6 +465,60 @@ public class CityActivity extends FragmentActivity {
 			// Things to be done while execution of long running operation is in
 			// progress. For example updating ProgessDialog
 		}
+	}
+
+	/*************************************
+	 * HELPER METHODS
+	 ************************************/
+	
+	/** Creates an alert dialog **/
+	private void showDialog(CharSequence text) {
+		// build a dialog
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		// set the message
+		builder.setMessage(text).setCancelable(false)
+		/*
+		 * .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		 * public void onClick(DialogInterface dialog, int id) {
+		 * MyActivity.this.finish(); } })
+		 */
+		// set only the negative button
+				.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
+		AlertDialog alert = builder.create();
+		alert.show();
+	}
+
+	/** Helper method for showing a Toast notification **/
+	private void showToast(CharSequence text, boolean timeShort) {
+		Context context = getApplicationContext();
+		int duration = timeShort ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG; // long
+																			// or
+																			// short?
+	
+		Toast toast = Toast.makeText(context, text, duration);
+		toast.show();
+	}
+
+	/** Checks if internet connection is available **/
+	private boolean isNetworkAvailable() {
+		ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo activeNetworkInfo = connectivityManager
+				.getActiveNetworkInfo();
+		return activeNetworkInfo != null;
+	}
+
+	// Formats the HTML Strings properly
+	// TODO: (&lt; &gt;)?
+	private String properFormat(String str) {
+		String proper = str.replaceAll("&amp;", "&");
+		proper = proper.replaceAll("&quot;", "\"");
+		proper = proper.replaceAll("&apos;", "\'");
+	
+		return proper;
 	}
 
 	/** End of AsyncTask class **/
