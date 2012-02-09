@@ -6,7 +6,7 @@
  
  	<!--  Custom Window style -->
     <style name="CustomTheme">
-        <item name="android:windowTitleSize">50dip</item>
+        <item name="android:windowTitleSize">40dip</item>
     </style>
     <!--   <item name="android:windowTitleBackgroundStyle">@style/CustomWindowTitleBackground</item> -->
     

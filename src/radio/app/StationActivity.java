@@ -3,7 +3,7 @@ package radio.app;
 /**
  * This Activity shows information about a selected station 
  * 
- * Should show the current song playing (with links to Amazon, Grooveshark, Android Market and Youtube)
+ * Should show the current song playing (with links to Amazon, Grooveshark, and Youtube)
  * 
  * Allow user to favorite the station (top-right) and see last 5 songs played
  * 
@@ -211,10 +211,10 @@ public class StationActivity extends FragmentActivity {
 		case R.id.ab_refresh: // refresh the song
 			this.refresh(null);
 			return true;
-		case R.id.ab_search: // perform a new search
+		//case R.id.ab_search: // perform a new search
 			// TODO:
 			// Look at performing new search
-			return true;
+			//return true;
 		case R.id.ab_favorite:
 			// TODO: Implement favoriting a station
 			// change the star icon appropriately

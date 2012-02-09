@@ -46,7 +46,7 @@ public class FavoritesArrayAdapter extends ArrayAdapter<Favorite> {
 			// Get the widgets
 			viewHolder.text1 = (TextView) convertView.findViewById(R.id._stationName1);
 			viewHolder.text2 = (TextView) convertView.findViewById(R.id._stationName2);
-			viewHolder.checkbox = (CheckBox) convertView.findViewById(R.id._favoriteCheckbox);
+			//viewHolder.checkbox = (CheckBox) convertView.findViewById(R.id._favoriteCheckbox);
 			
 			convertView.setTag(viewHolder);
 		}

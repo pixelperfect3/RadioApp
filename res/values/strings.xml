@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, RadioApp!</string>
-    <string name="app_name">RadioApp</string>
+    <string name="app_name">On The Radio</string>
     <string name="refresh">Refresh</string>
+    <string name="favorites">Favorites:</string>
+    <string name="defaultCheck">Default</string>
     <string name="station_selector">Select Station</string>
-    <string name="searchText">Search by City, Station, etc.</string>
+    <string name="searchText">Search by City, Zipcode or Location Button</string>
+    <string name="stations">Stations</string>
+    <string name="defaultString">Default?</string>
+    <string name="artist">Artist:</string>
+    <string name="song">Song:</string>
 </resources>
