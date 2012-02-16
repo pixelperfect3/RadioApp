@@ -6,7 +6,7 @@
     <!--  For customized background, add this to RelativeLayout:
     		android:background="@layout/list_bg" -->
     
-   <!-- <CheckBox
+   <CheckBox
         android:id="@+id/_favoriteStar"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
@@ -14,7 +14,7 @@
         android:layout_marginLeft="4dp"
         android:layout_marginRight="10dp" 
         style="?android:attr/starStyle"
-        android:onClick="setFavoriteStation"/> -->
+        android:onClick="setFavoriteStation"/>
 
     <TextView
         android:id="@+id/_stationName1"
@@ -25,9 +25,9 @@
         android:layout_marginTop="8dp"
        
         android:text=""
-        android:textSize="20dp" android:focusable="false" android:focusableInTouchMode="false"/>
- 		<!--  android:layout_toRightOf="@id/_favoriteStar" -->
- 		<!--  android:layout_alignTop="@+id/_favoriteStar" -->
+        android:textSize="20dp" android:focusable="false" android:focusableInTouchMode="false"
+ 		android:layout_toRightOf="@id/_favoriteStar"
+ 		android:layout_alignTop="@+id/_favoriteStar"/>
     <TextView
         android:id="@+id/_stationName2"
         android:layout_width="wrap_content"

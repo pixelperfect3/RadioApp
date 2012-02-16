@@ -13,8 +13,8 @@
 		android:checkable="true"/>
 	
 	<!--  search -->
-	<!--  <item android:id="@+id/ab_search" android:showAsAction="ifRoom"
-		android:title="" android:icon="@android:drawable/ic_menu_search" /> -->
+	<item android:id="@+id/ab_search" android:showAsAction="ifRoom"
+		android:title="" android:icon="@android:drawable/ic_menu_search" />
 
 	
 	

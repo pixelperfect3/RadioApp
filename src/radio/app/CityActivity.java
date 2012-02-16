@@ -107,6 +107,7 @@ public class CityActivity extends FragmentActivity {
 
 		// get the city from the Bundle passed in
 		String city = getIntent().getExtras().getString("CITY_NAME");
+		Log.v("City: ", city);
 		if (city != null) {
 			_location = city.trim();
 			this._locationTV = (TextView) findViewById(R.id._location);
@@ -196,10 +197,10 @@ public class CityActivity extends FragmentActivity {
 			case R.id.ab_refresh:		// refresh the song
 				this.refresh();
 				return true;
-			//case R.id.ab_search:		// perform a new search
+			case R.id.ab_search:		// perform a new search
 				// TODO:
 				// Look at performing new search
-				//return true;
+				return true;
 			default:
 				return super.onOptionsItemSelected(item);
 		}

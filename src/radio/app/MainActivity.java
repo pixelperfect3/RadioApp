@@ -7,11 +7,14 @@
  *  It also shows the favourite stations/songs of the user.
  *  
  *  TODO:
- *  -Create custom ListView/ListAdapter (use in both this and StationActivity.java). Needs to be done for this class
- *  -Show favourite stations (cities?)
- *  	* Should be able to click on station to open up StationView.java or something
+ *  
+ *  -Convert zipcode to city before sending to CityActivity
  	-Add autocomplete option (by cities)
  	-Custom background
+ 	
+ 	-Create custom ListView/ListAdapter (use in both this and StationActivity.java). Needs to be done for this class [PARTIAL]
+ 	-Show favourite stations (cities?) [PARTIAL DONE]
+ 	   * Should be able to click on station to open up StationView.java or something
 	-Have main app name with search box (should lead to different activity) 					[DONE]
     -Allow location by GPS 																		[PARTIALLY DONE]
     
@@ -203,12 +206,18 @@ public class MainActivity extends Activity {
 		public void onItemClick(AdapterView<?> parent, View view, int pos,
 				long id) {
 			
+			if (!MainActivity.this.isNetworkAvailable()) {
+				showToast(
+						"No Internet connection! Please turn on wi-fi or your data connection.",
+						false);
+				return;
+			}
+			
 			// Get the selected favorite
 			Favorite fave = (Favorite)parent.getItemAtPosition(pos);
-			Log.i("Selected FavoriteArrayAdapter:", fave.getName());
+			Log.e("Selected FavoriteArrayAdapter:", fave.getName());
 			// TODO: start the station activity
 			Intent intent = new Intent(MainActivity.this, StationActivity.class);//RadioApp.class);
-
 			Bundle parameters = new Bundle();
 			parameters.putString("STATION_NAME", fave.getName());
 			intent.putExtras(parameters);
