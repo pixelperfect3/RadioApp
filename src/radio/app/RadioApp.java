@@ -256,10 +256,10 @@ public class RadioApp extends FragmentActivity {
 			case R.id.ab_refresh:		// refresh the song
 				this.refresh(null);
 				return true;
-			case R.id.ab_search:		// perform a new search
+			//case R.id.ab_search:		// perform a new search
 				// TODO:
 				// Look at performing new search
-				return true;
+				//return true;
 			default:
 				return super.onOptionsItemSelected(item);
 		}
