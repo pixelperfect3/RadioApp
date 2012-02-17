@@ -242,8 +242,27 @@ public class MainActivity extends Activity {
 			return;
 		}
 
-		// else, do a search
-		this.search(toSearch);
+		// check if it's a zipcode - if it is, convert to city
+		if (Character.isDigit(toSearch.charAt(0))) {
+			Geocoder gcd = new Geocoder(getBaseContext(), Locale.getDefault());
+			List<Address> addresses;
+			try {
+				addresses = gcd.getFromLocationName(toSearch, 1);
+				if (addresses.size() > 0) {
+					String locality = addresses.get(0).getLocality();// addresses.get(0).getLocality());
+					Log.i("Locality: ", locality);
+					this.search(locality);
+				} else {
+					showToast("Error obtaining location from zipcode.", true);
+					return;
+				}
+			} catch (IOException e) {
+				showToast("Error obtaining location from zipcode.", true);
+				return;
+			}
+		}
+		else  // else, do a regular search
+			this.search(toSearch);
 	}
 
 	/** Method called when gps search button is pressed **/
