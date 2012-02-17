@@ -217,7 +217,7 @@ public class CityActivity extends FragmentActivity {
 
 		if (this._defaultCityCheckbox.isChecked()) { // set the default city to
 														// the current one
-			prefEditor.putString("DEFAULT", this._location.toUpperCase());
+			prefEditor.putString("DEFAULT", this._location);
 			prefEditor.commit();
 		} else { // remove it as default
 			prefEditor.remove("DEFAULT");
