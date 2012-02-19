@@ -8,20 +8,23 @@
 package radio.app;
 
 import java.util.List;
+
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 public class FavoritesArrayAdapter extends ArrayAdapter<Favorite> {
-	private final Context context;
+	private final MainActivity context;
 	private List<Favorite> favorites;
 
 	// For Favorites
-	public FavoritesArrayAdapter(Context context, List<Favorite> favorites) {
+	public FavoritesArrayAdapter(MainActivity context, List<Favorite> favorites) {
 		super(context, R.layout.rowlayout, favorites);
 		this.context = context;
 		this.favorites = favorites;
@@ -38,7 +41,7 @@ public class FavoritesArrayAdapter extends ArrayAdapter<Favorite> {
 		LayoutInflater inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		
-		ViewHolder viewHolder;
+		final ViewHolder viewHolder;
 		
 		if (convertView == null) {
 			convertView = inflater.inflate(R.layout.rowlayout, parent, false);
@@ -46,7 +49,28 @@ public class FavoritesArrayAdapter extends ArrayAdapter<Favorite> {
 			// Get the widgets
 			viewHolder.text1 = (TextView) convertView.findViewById(R.id._stationName1);
 			viewHolder.text2 = (TextView) convertView.findViewById(R.id._stationName2);
-			//viewHolder.checkbox = (CheckBox) convertView.findViewById(R.id._favoriteCheckbox);
+			viewHolder.checkbox = (CheckBox) convertView.findViewById(R.id._favoriteStar);
+			viewHolder.checkbox.setChecked(true); // has to be checked to be a favorite
+			viewHolder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView,
+						boolean isChecked) {
+					// get the favorite
+					Favorite favorite = new Favorite();
+					//Log.v("ViewHolder:", viewHolder.text1.getText().toString());
+					favorite.setName(viewHolder.text1.getText().toString());
+					favorite.setType(Favorite.Type.STATION);
+					// favorite = (Favorite) viewHolder. .checkbox.getTag();
+					//element.setSelected(buttonView.isChecked());
+					
+					// delete it
+					MainActivity._dataSource.deleteFavorite(favorite);
+					
+					// refresh the view
+					context.removeFavorite(favorite);
+				}
+			});
 			
 			convertView.setTag(viewHolder);
 		}

@@ -58,7 +58,7 @@ public class CustomArrayAdapter extends ArrayAdapter<String> {
 			viewHolder = new ViewHolder();
 			viewHolder.text1 = (TextView) convertView.findViewById(R.id._stationName1);
 			viewHolder.text2 = (TextView) convertView.findViewById(R.id._stationName2);
-			//viewHolder.checkbox = (CheckBox) convertView.findViewById(R.id._favoriteStar);
+			viewHolder.checkbox = (CheckBox) convertView.findViewById(R.id._favoriteStar);
 			
 			convertView.setTag(viewHolder);
 		} 
@@ -85,10 +85,10 @@ public class CustomArrayAdapter extends ArrayAdapter<String> {
 			}
 		}
 		
-		/*if (isChecked)
+		if (isChecked)
 			viewHolder.checkbox.setChecked(true);
 		else 
-			viewHolder.checkbox.setChecked(false); **/
+			viewHolder.checkbox.setChecked(false);
 		
 		return convertView;
 	}

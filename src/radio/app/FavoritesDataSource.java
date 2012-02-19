@@ -80,10 +80,10 @@ public class FavoritesDataSource {
 		Cursor cursor = database.rawQuery(sql, null);
 		if (cursor.moveToFirst()) {
 			// TEMPORARY TODO: Get all favorites and list them out
-			List<Favorite> faves = getAllFavorites();
+			/*List<Favorite> faves = getAllFavorites();
 			for (int i = 0; i < faves.size(); i++) {
 				Log.v("FAVORITE!", faves.get(i).getId() + "," + faves.get(i).getName() + "," + faves.get(i).getType());
-			}
+			}*/
 			
 			
 		    // record exists

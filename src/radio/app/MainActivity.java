@@ -67,7 +67,8 @@ public class MainActivity extends Activity {
 	private EditText _searchText;  											// Search text box
 	public static final String PREFERENCE_FILENAME = "RadioAppPreferences"; // Shared preferences name
 	private ListView _favoritesLV; 											// ListView for showing favorites
-	private FavoritesDataSource _dataSource; 								// Database for storing favorites
+	private FavoritesArrayAdapter adapter;
+	public static FavoritesDataSource _dataSource; 								// Database for storing favorites
 	// GPS
 	private LocationManager locationManager;
 	private double _latitude, _longitude;
@@ -165,19 +166,27 @@ public class MainActivity extends Activity {
 	 *********************************/
 	
 	/** Updates the favorites list **/
-	private void updateFavorites() {
+	public void updateFavorites() {
 		// get all the favorites
 		List<Favorite> values = _dataSource.getAllFavorites();
 
 		// Populate the ListView
-		FavoritesArrayAdapter adapter = new FavoritesArrayAdapter(
+		adapter = new FavoritesArrayAdapter(
 				MainActivity.this,
 				values);
+		
 		_favoritesLV.setAdapter(adapter);
 		
 		// now set the listview to listen for changes
 		_favoritesLV.setOnItemClickListener(new MyOnItemClickListener());
 		//_favoritesLV.setOnItemSelectedListener(new FavoriteSelectedListener());
+	}
+	
+	/** removes from the favorites list **/
+	public void removeFavorite(Favorite favorite) {
+		adapter.remove(favorite);
+		this.showToast("Unfavorited " + favorite.getName(), true);
+		//_favoritesLV.
 	}
 	
 	/** Allows the user to unfavorite a station **/
