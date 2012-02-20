@@ -91,7 +91,7 @@ public class CityActivity extends FragmentActivity {
 	private SharedPreferences _settings;
 
 	// Database for storing favorites
-	private FavoritesDataSource _dataSource;
+	public static FavoritesDataSource _dataSource;
 	
 	/****************************************************
 	 * METHODS FOR CREATING, PAUSING, RESUMING, DESTROYING
@@ -132,6 +132,8 @@ public class CityActivity extends FragmentActivity {
 		/** Open the favorites database **/
 		_dataSource = new FavoritesDataSource(this);
 		_dataSource.open();
+		// Temporary TODO:
+		//_dataSource.close();
 		
 		/** Setup the ListView by populating it with the list of radio stations **/
 		// TODO: For some reason not necessary to call here - is it because onResume() gets called automatically?

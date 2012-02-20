@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 public class CustomArrayAdapter extends ArrayAdapter<String> {
@@ -48,7 +49,7 @@ public class CustomArrayAdapter extends ArrayAdapter<String> {
 		LayoutInflater inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		
-		ViewHolder viewHolder;
+		final ViewHolder viewHolder;
 		
 		// When convertView is not null, we can reuse it directly, there is
 		// no need to reinflate it. We only inflate a new View when the convertView
@@ -89,6 +90,30 @@ public class CustomArrayAdapter extends ArrayAdapter<String> {
 			viewHolder.checkbox.setChecked(true);
 		else 
 			viewHolder.checkbox.setChecked(false);
+		
+		viewHolder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView,
+					boolean isChecked) {
+				// get the favorite
+				Favorite favorite = new Favorite();
+				//Log.v("ViewHolder:", viewHolder.text1.getText().toString());
+				String name = viewHolder.text1.getText().toString();
+				favorite.setName(name);
+				favorite.setType(Favorite.Type.STATION);
+				// favorite = (Favorite) viewHolder. .checkbox.getTag();
+				//element.setSelected(buttonView.isChecked());
+				
+				if (!isChecked) // delete
+					CityActivity._dataSource.deleteFavorite(favorite);
+				else 			// add
+					CityActivity._dataSource.createFavorite(Favorite.Type.STATION, name);
+				
+				// refresh the view
+				// context.removeFavorite(favorite);
+			}
+		});
 		
 		return convertView;
 	}

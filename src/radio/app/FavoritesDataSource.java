@@ -67,6 +67,7 @@ public class FavoritesDataSource {
 		} else {
 		    // record not found
 		}
+		cursor.close();
 	}
 
 	/** Deletes a specific Favorite **/
@@ -93,6 +94,7 @@ public class FavoritesDataSource {
 		} else {
 		    // record not found
 		}
+		cursor.close();
 		/*Cursor cursor = database.query(MySQLiteHelper.TABLE_FAVORITES,
 				allColumns, null, null, null, null, null);
 		while (!cursor.isAfterLast()) {
