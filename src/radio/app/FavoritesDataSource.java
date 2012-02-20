@@ -3,8 +3,7 @@
  *  Taken from:
  *  http://www.vogella.de/articles/AndroidSQLite/article.html
  *  
- *  TODO:
- *  -Add method to check if station/song already exists
+ *  
  */
 
 package radio.app;
@@ -47,16 +46,27 @@ public class FavoritesDataSource {
 		dbHelper.deleteTable();
 	}
 	
-	/** Creates a Favorite object according to type and name **/
-	public void createFavorite(Favorite.Type type, String name) {
-		// Check if it already exists
-		/*Cursor cursor = database.query(MySQLiteHelper.TABLE_FAVORITES,
-				allColumns, MySQLiteHelper.COLUMN_NAME + " = " + name, null,
-				null, null, null);*/
+	/** Checks if a Favorite already exists or not **/
+	public boolean hasFavorite(String name) {
 		String sql = "SELECT * FROM " + MySQLiteHelper.TABLE_FAVORITES + " WHERE name = '" + name + "'";
 		Cursor cursor = database.rawQuery(sql, null);
 		
 		if (!cursor.moveToFirst()) {
+			cursor.close();
+			return false;
+		}
+		
+		cursor.close();
+		return true;
+	}
+	
+	/** Creates a Favorite object according to type and name **/
+	public void createFavorite(Favorite.Type type, String name) {
+		// Check if it already exists
+		String sql = "SELECT * FROM " + MySQLiteHelper.TABLE_FAVORITES + " WHERE name = '" + name + "'";
+		Cursor cursor = database.rawQuery(sql, null);
+		
+		if (!hasFavorite(name)) {//!cursor.moveToFirst()) {
 		    // record does not exist, add it
 			ContentValues values = new ContentValues();
 			values.put(MySQLiteHelper.COLUMN_TYPE, type.name());
@@ -71,21 +81,12 @@ public class FavoritesDataSource {
 	}
 
 	/** Deletes a specific Favorite **/
-	// TODO: Delete by ID + TYPE + NAME?
 	public void deleteFavorite(Favorite favorite) {
 		String name = favorite.getName();
 		Log.v("DELETING NAME!!", name);
-		//Cursor cursor = database.rawQuery("SELECT * FROM " + MySQLiteHelper.TABLE_FAVORITES + " WHERE " + MySQLiteHelper.COLUMN_NAME + "= ?", new String[] { name });
-		// Temporary TODO: Currently getting all favorites, but should only get one
 		String sql = "SELECT * FROM " + MySQLiteHelper.TABLE_FAVORITES + " WHERE name = '" + name + "'";
 		Cursor cursor = database.rawQuery(sql, null);
 		if (cursor.moveToFirst()) {
-			// TEMPORARY TODO: Get all favorites and list them out
-			/*List<Favorite> faves = getAllFavorites();
-			for (int i = 0; i < faves.size(); i++) {
-				Log.v("FAVORITE!", faves.get(i).getId() + "," + faves.get(i).getName() + "," + faves.get(i).getType());
-			}*/
-			
 			
 		    // record exists
 			database.delete(MySQLiteHelper.TABLE_FAVORITES, MySQLiteHelper.COLUMN_NAME
@@ -95,18 +96,6 @@ public class FavoritesDataSource {
 		    // record not found
 		}
 		cursor.close();
-		/*Cursor cursor = database.query(MySQLiteHelper.TABLE_FAVORITES,
-				allColumns, null, null, null, null, null);
-		while (!cursor.isAfterLast()) {
-			Favorite f = cursorToFavorite(cursor);
-			if (f.getName().equals(name)) {
-				database.delete(MySQLiteHelper.TABLE_FAVORITES, MySQLiteHelper.COLUMN_NAME
-						+ " = " + name, null);
-				Log.v("DELETING FAVORITE", "Favorite deleted with name: " + name);
-			}
-			cursor.moveToNext();
-		}*/
-		
 	}
 
 	/** Gets all the favorites **/

@@ -8,13 +8,11 @@
  *  
  *  @author shayan javed (shayanj@gmail.com)
  *  TODO:
+ *  -Implement the search functionality
     -Prettier backgrounds
     -Just generally less ugly
-    
-    -For list of stations, make sure you show which are already favorited
-    -Implement favoriting/unfavoriting a station
  
-    TODO BUG:
+    BUG:
     -When going back to MainActivity and then searching by location, not setting the default checkbox
     (Probably because it's not uppercase)
     
@@ -132,13 +130,6 @@ public class CityActivity extends FragmentActivity {
 		/** Open the favorites database **/
 		_dataSource = new FavoritesDataSource(this);
 		_dataSource.open();
-		// Temporary TODO:
-		//_dataSource.close();
-		
-		/** Setup the ListView by populating it with the list of radio stations **/
-		// TODO: For some reason not necessary to call here - is it because onResume() gets called automatically?
-		/*AsyncTask<String, Void, String[]> readStationsTask = new ReadStationsTask(
-				this).execute(); */
 
 		Log.v("CHANNELS LOADED:", this._selectedChannelName);
 		// the Time object
@@ -152,8 +143,7 @@ public class CityActivity extends FragmentActivity {
 		if (_settings.contains("DEFAULT")) { // Default City Stored
 			String defaultCity = _settings.getString("DEFAULT", "");
 			// if city is the same as the default city, set it to checked
-			// TODO: Also check for numbers (Zipcode)
-			if (_location.equalsIgnoreCase(defaultCity.trim())) // TODO: Not working for some reason
+			if (_location.equalsIgnoreCase(defaultCity.trim()))
 				_defaultCityCheckbox.setChecked(true);
 		}
 
@@ -242,22 +232,6 @@ public class CityActivity extends FragmentActivity {
 		/** Setup the ListView by populating it with the list of radio stations **/
 		AsyncTask<String, Void, String[]> readStationsTask = new ReadStationsTask(
 				this).execute();
-	}
-
-	/** Allows the user to set the current station as a favorite **/
-	public void setFavoriteStation(View view) {
-		// TODO:
-		// Get the name
-		//TextView nameView = (TextView)view.get
-		
-		/*if (this._favoriteCheckbox.isChecked()) { // set as favorite
-			this._dataSource.createFavorite(Favorite.Type.STATION, this._selectedChannelName);
-		} else { // remove as favorite
-			Favorite f = new Favorite();
-			f.setName(this._selectedChannelName);
-			f.setType(Favorite.Type.STATION);
-			this._dataSource.deleteFavorite(f);
-		}*/
 	}
 
 	/** Inner class used just for listening to the ListView **/
@@ -369,8 +343,6 @@ public class CityActivity extends FragmentActivity {
 				JSONArray jsonArray = new JSONArray(
 						jsonobj.getString("stations"));
 
-				/** TODO: Perhaps part below should be in postExecute()? **/
-
 				// Create the array of strings which will be used for populating
 				// the spinner
 				String[] stations = new String[jsonArray.length()];
@@ -378,7 +350,7 @@ public class CityActivity extends FragmentActivity {
 				// If not stations found
 				if (stations.length == 0) {
 					showToast("No stations found!", false);
-					finish(); // TODO: Properly show dialog
+					finish();
 				}
 
 				// go through each station

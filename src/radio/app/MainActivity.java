@@ -8,16 +8,9 @@
  *  
  *  TODO:
  *  
- *  -Convert zipcode to city before sending to CityActivity
  	-Add autocomplete option (by cities)
  	-Custom background
- 	
- 	-Create custom ListView/ListAdapter (use in both this and StationActivity.java). Needs to be done for this class [PARTIAL]
- 	-Show favourite stations (cities?) [PARTIAL DONE]
- 	   * Should be able to click on station to open up StationView.java or something
-	-Have main app name with search box (should lead to different activity) 					[DONE]
-    -Allow location by GPS 																		[PARTIALLY DONE]
-    
+
     -Add ImageButtons for search (the magnifying glass and the location icon from Google Maps) 	[DONE!]
  	 	-Add onfocus, onclick images
  */
@@ -28,12 +21,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-import radio.app.CityActivity.MyOnItemClickListener;
-
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Address;
@@ -57,7 +46,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
 
 public class MainActivity extends Activity {
 	
@@ -113,8 +101,6 @@ public class MainActivity extends Activity {
 		locationManager = (LocationManager) this
 				.getSystemService(Context.LOCATION_SERVICE);
 
-		
-		// TODO: Open it again on onResume?
 		// temporary - to delete a whole database
 		//this.deleteDatabase("favorites.db");
 		
@@ -184,28 +170,13 @@ public class MainActivity extends Activity {
 	
 	/** removes from the favorites list **/
 	public void removeFavorite(Favorite favorite) {
-		adapter.remove(favorite);
+		// TODO: Check why this is not working
+		// adapter.remove(favorite);
+		
+		this.updateFavorites();
+		
 		this.showToast("Unfavorited " + favorite.getName(), true);
 		//_favoritesLV.
-	}
-	
-	/** Allows the user to unfavorite a station **/
-	public void setFavoriteStation(View view) {
-		// TODO:
-		// Convert to 
-		TextView nameView = (TextView)view;
-		/*
-		if (this._favoriteCheckbox.isChecked()) { // set as favorite
-			this._dataSource.createFavorite(Favorite.Type.STATION, this._selectedChannelName);
-		} else { // remove as favorite
-			Favorite f = new Favorite();
-			f.setName(this._selectedChannelName);
-			f.setType(Favorite.Type.STATION);
-			this._dataSource.deleteFavorite(f);
-		}*/
-		
-		// refresh
-		this.updateFavorites();
 	}
 	
 	/** Inner class used just for listening to the Favorites ListView **/
@@ -225,7 +196,8 @@ public class MainActivity extends Activity {
 			// Get the selected favorite
 			Favorite fave = (Favorite)parent.getItemAtPosition(pos);
 			Log.e("Selected FavoriteArrayAdapter:", fave.getName());
-			// TODO: start the station activity
+			
+			// start the station activity
 			Intent intent = new Intent(MainActivity.this, StationActivity.class);//RadioApp.class);
 			Bundle parameters = new Bundle();
 			parameters.putString("STATION_NAME", fave.getName());
@@ -245,7 +217,7 @@ public class MainActivity extends Activity {
 		// read text to search
 		String toSearch = _searchText.getText().toString();
 
-		// if empty, return nothing - alert for now TODO:
+		// if empty, return nothing - alert for now 
 		if (toSearch.equals("")) {
 			showToast("Nothing entered!", true);
 			return;
@@ -270,16 +242,12 @@ public class MainActivity extends Activity {
 				return;
 			}
 		}
-		else  // else, do a regular search
+		else  // do a regular search
 			this.search(toSearch);
 	}
 
 	/** Method called when gps search button is pressed **/
 	public void searchByGPS(View v) {
-		/*****
-		 * TODO
-		 * TEMPORARY: Convert Latitude/Longitude to city
-		 */
 		// get the latitude/longitude
 		String locationProvider = LocationManager.NETWORK_PROVIDER;
 		Location lastKnownLocation = locationManager
@@ -318,7 +286,6 @@ public class MainActivity extends Activity {
 	private void search(String location) {
 		// check internet connection
 		if (!this.isNetworkAvailable()) {
-			// showDialog("No Internet connection! Please turn on wi-fi or your data connection.");
 			showToast(
 					"No Internet connection! Please turn on wi-fi or your data connection.",
 					false);
@@ -327,7 +294,6 @@ public class MainActivity extends Activity {
 
 		// Send info to other city
 		Intent intent = new Intent(this, CityActivity.class);//RadioApp.class);
-		/** Add Bundle here (City, location, etc.): **/
 
 		Bundle parameters = new Bundle();
 		parameters.putString("CITY_NAME", location);
@@ -362,27 +328,6 @@ public class MainActivity extends Activity {
 		NetworkInfo activeNetworkInfo = connectivityManager
 				.getActiveNetworkInfo();
 		return activeNetworkInfo != null;
-	}
-
-	/** Creates an alert dialog with the passed in text **/
-	private void showDialog(CharSequence text) {
-		// build a dialog
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-		builder.setMessage(text).setCancelable(false)
-		/*
-		 * .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-		 * public void onClick(DialogInterface dialog, int id) {
-		 * MyActivity.this.finish(); } })
-		 */
-		// set only the negative button
-				.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialog.cancel();
-					}
-				});
-		AlertDialog alert = builder.create();
-		alert.show();
 	}
 
 	/** Helper method for showing a Toast notification **/

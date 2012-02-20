@@ -3,7 +3,7 @@ package radio.app;
 /**
  * This Activity shows information about a selected station 
  * 
- * Should show the current song playing (with links to Amazon, Grooveshark, and Youtube)
+ * Should show the current song playing (with links to Amazon, Grooveshark, Youtube and Android Market)
  * 
  * Allow user to favorite the station (top-right) and see last 5 songs played
  * 
@@ -179,21 +179,10 @@ public class StationActivity extends FragmentActivity {
 		getMenuInflater().inflate(R.layout.station_header, menu);
 
 		// Check if channel is already a favorite and update the star checkbox
-		// TODO: Make it more efficient so you don't have to check everytime
-		// TODO Temporary: We are currently getting all comments, but only get
-		// selected ones
-		List<Favorite> favorites = this._dataSource.getAllFavorites();
-		boolean isChecked = false;
-		for (int i = 0; i < favorites.size(); i++) {
-			if (favorites.get(i).getName().equals(_stationName)) {
-				isChecked = true;
-				break;
-			}
-		}
 
 		MenuItem item = menu.getItem(1);
 
-		if (isChecked) {
+		if (this._dataSource.hasFavorite(_stationName)) {
 			item.setChecked(true);
 			item.setIcon(android.R.drawable.btn_star_big_on);
 		} else {
@@ -353,7 +342,6 @@ public class StationActivity extends FragmentActivity {
 
 	/** Allows the user to set the current station as a favorite **/
 	public void setFavoriteStation(boolean setFavorite) {// View view) {
-		// TODO:
 		if (setFavorite) { // set as favorite
 			this._dataSource.createFavorite(Favorite.Type.STATION,
 					this._stationName);
