@@ -18,7 +18,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.List;
 import java.util.Scanner;
 
 import org.apache.http.HttpEntity;
@@ -141,7 +140,7 @@ public class StationActivity extends FragmentActivity {
 
 		Log.e("SELECTED CHANNEL2:", this._selectedChannelName);
 		if (this._selectedChannelName != "") {
-			AsyncTask<String, Void, Boolean> readTask = new ReadSongTask(this)
+			new ReadSongTask(this)
 					.execute(_selectedChannelName);// updateCurrentSong(_selectedChannelName);
 		}
 
@@ -207,11 +206,9 @@ public class StationActivity extends FragmentActivity {
 			this.refresh(null);
 			return true;
 		case R.id.ab_search: // perform a new search
-			// TODO:
 			this.onSearchRequested();
 			return true;
 		case R.id.ab_favorite:
-			// TODO: Implement favoriting a station
 			// change the star icon appropriately
 			item.setChecked(!item.isChecked());
 			if (item.isChecked()) {
@@ -240,7 +237,7 @@ public class StationActivity extends FragmentActivity {
 		}
 
 		// Try to read the JSON information and then update the TextView
-		AsyncTask readTask = new ReadSongTask(this)
+		new ReadSongTask(this)
 				.execute(_selectedChannelName);// updateCurrentSong(_selectedChannelName);
 	}
 
@@ -414,7 +411,7 @@ public class StationActivity extends FragmentActivity {
 			// execution of result of Long time consuming operation
 			// dismiss the dialog
 			dialog.dismiss();
-			String time = now.format("%H:%M");
+			//String time = now.format("%H:%M");
 			/*
 			 * _stationInfoTV.setText("Station: " + _selectedChannelName +
 			 * "\n\tTime: " + time);
