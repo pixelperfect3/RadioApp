@@ -6,6 +6,7 @@
     <string name="defaultCheck">Default</string>
     <string name="station_selector">Select Station</string>
     <string name="searchText">Search by City, Zipcode or Location Button</string>
+    <string name="search_hint">Search by City name or Zipcode</string>
     <string name="stations">Stations</string>
     <string name="defaultString">Default?</string>
     <string name="artist">Artist:</string>

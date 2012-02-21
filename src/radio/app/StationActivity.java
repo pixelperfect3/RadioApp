@@ -150,7 +150,7 @@ public class StationActivity extends FragmentActivity {
 
 	}
 
-	/** onPause and onResume methods **/
+	/** onPause, onResume, onDestroy and onSearchRequested methods **/
 	@Override
 	protected void onResume() {
 		_dataSource.open();
@@ -167,6 +167,12 @@ public class StationActivity extends FragmentActivity {
 	protected void onDestroy() {
 		_dataSource.close();
 		super.onDestroy();
+	}
+	
+	@Override
+	public boolean onSearchRequested() {
+		_dataSource.close();
+		return super.onSearchRequested();
 	}
 
 	/************************
@@ -200,10 +206,10 @@ public class StationActivity extends FragmentActivity {
 		case R.id.ab_refresh: // refresh the song
 			this.refresh(null);
 			return true;
-		//case R.id.ab_search: // perform a new search
+		case R.id.ab_search: // perform a new search
 			// TODO:
-			// Look at performing new search
-			//return true;
+			this.onSearchRequested();
+			return true;
 		case R.id.ab_favorite:
 			// TODO: Implement favoriting a station
 			// change the star icon appropriately

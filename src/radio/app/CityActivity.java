@@ -25,6 +25,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
+import java.util.Locale;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -39,11 +41,14 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -103,8 +108,32 @@ public class CityActivity extends FragmentActivity {
 		// set layout 
 		setContentView(R.layout.city);
 
-		// get the city from the Bundle passed in
-		String city = getIntent().getExtras().getString("CITY_NAME");
+		Intent intent = getIntent();
+		String city = "";
+		if (Intent.ACTION_SEARCH.equals(intent.getAction())) { // Check if it was a search Intent
+		      city = getIntent().getStringExtra(SearchManager.QUERY).trim();
+		      if (Character.isDigit(city.charAt(0))) {		// zipcode?
+					Geocoder gcd = new Geocoder(getBaseContext(), Locale.getDefault());
+					List<Address> addresses;
+					try {
+						addresses = gcd.getFromLocationName(city, 1);
+						if (addresses.size() > 0) {
+							city = addresses.get(0).getLocality();// addresses.get(0).getLocality());
+							//Log.i("Locality: ", locality);
+							
+						} else {
+							showToast("Error obtaining location from zipcode.", true);
+							return;
+						}
+					} catch (IOException e) {
+						showToast("Error obtaining location from zipcode.", true);
+						return;
+					}
+				}
+		}
+		else // get the city name from MainActivity
+			city = getIntent().getExtras().getString("CITY_NAME");
+		
 		Log.v("City: ", city);
 		if (city != null) {
 			_location = city.trim();
@@ -149,7 +178,7 @@ public class CityActivity extends FragmentActivity {
 
 	} // End of OnCreate
 
-	/** onPause and onResume methods **/
+	/** onPause, onResume, onDestroy and onSearchRequested methods **/
 	@Override
 	protected void onResume() {
 		_dataSource.open();
@@ -168,6 +197,12 @@ public class CityActivity extends FragmentActivity {
 	protected void onDestroy() {
 		_dataSource.close();
 		super.onDestroy();
+	}
+	
+	@Override
+	public boolean onSearchRequested() {
+		_dataSource.close();
+		return super.onSearchRequested();
 	}
 	
 	/************************
@@ -191,7 +226,7 @@ public class CityActivity extends FragmentActivity {
 				return true;
 			case R.id.ab_search:		// perform a new search
 				// TODO:
-				// Look at performing new search
+				this.onSearchRequested();
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
