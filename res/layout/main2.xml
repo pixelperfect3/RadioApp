@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Defines the look for the Main Activity -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:tileMode="repeat" >
+
+    <!-- Relative Layout holds everything -->
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="121dp"
+        android:layout_marginTop="5dip"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/favoritesLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="20dp"
+            android:text="@string/favorites"
+            android:textSize="18sp"
+            android:typeface="serif" />
+
+        <ListView
+            android:id="@+id/favoritesLV"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.19"
+            android:cacheColorHint="@android:color/transparent"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="3dp" >
+        </ListView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/LinearLayout02"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical" >
+
+        <RelativeLayout
+            android:id="@+id/relativeLayout1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/locationLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="20dp"
+                android:text="@string/stationsLocation"
+                android:textSize="14sp"
+                android:typeface="serif" />
+
+            <ProgressBar
+                android:id="@+id/loadingBar"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_toRightOf="@+id/locationLabel"
+                android:indeterminate="true"
+                android:paddingLeft="15dip"
+                android:visibility="invisible" />
+
+        </RelativeLayout>
+
+        <ListView
+            android:id="@+id/locationLV"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.19"
+            android:cacheColorHint="@android:color/transparent"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="3dp" >
+        </ListView>
+
+    </LinearLayout>
+
+</LinearLayout>

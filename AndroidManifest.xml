@@ -9,7 +9,7 @@
 <uses-sdk android:targetSdkVersion="13" android:minSdkVersion="4"/>
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:theme="@android:style/Theme.Light">
      	<!--  The Main Activity (for searching and viewing favourites ) -->
-    	<activity android:name=".MainActivity" 
+    	<activity android:name=".MainActivity2" 
                   android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
