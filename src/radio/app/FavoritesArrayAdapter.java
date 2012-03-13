@@ -20,11 +20,11 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 public class FavoritesArrayAdapter extends ArrayAdapter<Favorite> {
-	private final MainActivity context;
+	private final MainActivity2 context;
 	private List<Favorite> favorites;
 
 	// For Favorites
-	public FavoritesArrayAdapter(MainActivity context, List<Favorite> favorites) {
+	public FavoritesArrayAdapter(MainActivity2 context, List<Favorite> favorites) {
 		super(context, R.layout.rowlayout, favorites);
 		this.context = context;
 		this.favorites = favorites;
@@ -65,7 +65,7 @@ public class FavoritesArrayAdapter extends ArrayAdapter<Favorite> {
 					//element.setSelected(buttonView.isChecked());
 					
 					// delete it
-					MainActivity._dataSource.deleteFavorite(favorite);
+					MainActivity2._dataSource.deleteFavorite(favorite);
 					
 					// refresh the view
 					context.removeFavorite(favorite);

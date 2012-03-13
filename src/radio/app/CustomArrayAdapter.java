@@ -12,6 +12,7 @@ import java.util.List;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -19,7 +20,7 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 public class CustomArrayAdapter extends ArrayAdapter<String> {
-	private final Context context;
+	private final MainActivity2 context;
 	private final String[] values;
 	
 	// Database for storing favorites
@@ -27,7 +28,7 @@ public class CustomArrayAdapter extends ArrayAdapter<String> {
 	List<Favorite> favorites; // all the favorites
 	
 	// For Strings
-	public CustomArrayAdapter(Context context, String[] values) {
+	public CustomArrayAdapter(MainActivity2 context, String[] values) {
 		super(context, R.layout.rowlayout, values);
 		this.context = context;
 		this.values = values;
@@ -91,7 +92,31 @@ public class CustomArrayAdapter extends ArrayAdapter<String> {
 		else 
 			viewHolder.checkbox.setChecked(false);
 		
-		viewHolder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+		viewHolder.checkbox.setOnClickListener(new OnClickListener() {
+			@Override
+	          public void onClick(View v) { 
+				// get the favorite
+				Favorite favorite = new Favorite();
+				//Log.v("ViewHolder:", viewHolder.text1.getText().toString());
+				String name = viewHolder.text1.getText().toString();
+				favorite.setName(name);
+				favorite.setType(Favorite.Type.STATION);
+				// favorite = (Favorite) viewHolder. .checkbox.getTag();
+				//element.setSelected(buttonView.isChecked());
+				
+				CheckBox c = (CheckBox)v;
+				
+				if (!c.isChecked()) // delete
+					MainActivity2._dataSource.deleteFavorite(favorite);
+				else 			// add
+					MainActivity2._dataSource.createFavorite(Favorite.Type.STATION, name);
+				
+				context.updateFavorites();
+	          }
+		});
+		
+		
+		/*viewHolder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView,
@@ -113,7 +138,7 @@ public class CustomArrayAdapter extends ArrayAdapter<String> {
 				// refresh the view
 				// context.removeFavorite(favorite);
 			}
-		});
+		});*/
 		
 		return convertView;
 	}

@@ -436,7 +436,7 @@ public class MainActivity2 extends Activity {
 		
 					lv.setAdapter(cadapter);
 					// now set the listview to listen for changes
-					lv.setOnItemClickListener(new MyOnItemClickListener());
+					lv.setOnItemClickListener(new MyOnItemClickListenerLocation());
 					//lv.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
 					/*lv.setOnItemClickListener(new OnItemClickListener() {
 					    @Override
@@ -472,6 +472,26 @@ public class MainActivity2 extends Activity {
 		protected void onProgressUpdate(Void... values) {
 			// Things to be done while execution of long running operation is in
 			// progress. For example updating ProgessDialog
+		}
+	}
+	
+	/** Inner class used just for listening to the Location ListView **/
+	public class MyOnItemClickListenerLocation implements OnItemClickListener {
+
+		// When item selected start new station activity
+		public void onItemClick(AdapterView<?> parent, View view, int pos,
+				long id) {
+				
+			String _selectedChannelName = parent.getItemAtPosition(pos).toString();
+			Log.v("Clicked List:", _selectedChannelName);
+			
+			Intent intent = new Intent(MainActivity2.this, StationActivity.class);
+
+			Bundle parameters = new Bundle();
+			parameters.putString("STATION_NAME", _selectedChannelName);
+			intent.putExtras(parameters);
+
+			MainActivity2.this.startActivity(intent); 
 		}
 	}
 	

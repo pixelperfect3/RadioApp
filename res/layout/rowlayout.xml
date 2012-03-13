@@ -13,7 +13,8 @@
         android:layout_alignParentLeft="true"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="10dp" 
-        style="?android:attr/starStyle"/>
+        android:button="@android:drawable/btn_star" />
+        <!--  style="?android:attr/starStyle"/> -->
 
     <TextView
         android:id="@+id/_stationName1"
