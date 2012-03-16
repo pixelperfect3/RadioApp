@@ -68,7 +68,6 @@ public class MainActivity2 extends Activity {
 	public static FavoritesDataSource _dataSource; 							// Database for storing favorites
 	// GPS
 	private LocationManager locationManager;
-	private double _latitude, _longitude;
 	
 	/****************************************************
 	 * METHODS FOR CREATING, PAUSING, RESUMING, DESTROYING
@@ -191,7 +190,6 @@ public class MainActivity2 extends Activity {
 		
 		// now set the listview to listen for changes
 		_favoritesLV.setOnItemClickListener(new MyOnItemClickListener());
-		//_favoritesLV.setOnItemSelectedListener(new FavoriteSelectedListener());
 	}
 	
 	/** removes from the favorites list **/
@@ -202,7 +200,6 @@ public class MainActivity2 extends Activity {
 		this.updateFavorites();
 		
 		this.showToast("Unfavorited " + favorite.getName(), true);
-		//_favoritesLV.
 	}
 	
 	/** Inner class used just for listening to the Favorites ListView **/
@@ -221,7 +218,6 @@ public class MainActivity2 extends Activity {
 			
 			// Get the selected favorite
 			Favorite fave = (Favorite)parent.getItemAtPosition(pos);
-			Log.e("Selected FavoriteArrayAdapter:", fave.getName());
 			
 			// start the station activity
 			Intent intent = new Intent(MainActivity2.this, StationActivity.class);//RadioApp.class);
@@ -304,12 +300,14 @@ public class MainActivity2 extends Activity {
 																// addresses.get(0).getLocality());
 					return locality;
 				} else {
-					showToast("Error obtaining location.", true);
+					//showToast("Error obtaining location.", true);
+					//MainActivity2.this._locationLabel.setText("Unable to lookup current location. Please try again later");
 					return null;
 				}
 
 			} catch (IOException e) {
-				showToast("Error obtaining location.", true);
+				//showToast("Error obtaining location.", true);
+				//MainActivity2.this._locationLabel.setText("Unable to lookup current location. Please try again later");
 				return null;
 			}
 		}
@@ -320,7 +318,7 @@ public class MainActivity2 extends Activity {
 			
 			// check location result
 			if (result == null) {
-				MainActivity2.this._locationLabel.setText("Could not look up location. Please try again later");
+				MainActivity2.this._locationLabel.setText("Can't look up location. Please try again later.");
 				// hide the progress bar
 				MainActivity2.this._progressBar.setVisibility(View.INVISIBLE);
 			}
@@ -399,12 +397,11 @@ public class MainActivity2 extends Activity {
 				// go through each station
 				for (int i = 0; i < jsonArray.length(); i++) {
 					JSONObject jsonObject = jsonArray.getJSONObject(i);
-					// get the station name
+					
+					// get the name and description
 					String name = jsonObject.getString("name");
-					// get the description
 					String desc = properFormat(jsonObject.getString("desc"));
 
-					// add to the string array
 					stations[i] = name + " " + desc;
 				}
 
@@ -413,6 +410,7 @@ public class MainActivity2 extends Activity {
 			} catch (Exception e) {
 				Log.e(CityActivity.class.getName(),
 						"JSON Exception: " + e.toString());
+				
 				return null;
 			}
 		}
@@ -435,28 +433,19 @@ public class MainActivity2 extends Activity {
 							stations);
 		
 					lv.setAdapter(cadapter);
+					
 					// now set the listview to listen for changes
 					lv.setOnItemClickListener(new MyOnItemClickListenerLocation());
-					//lv.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-					/*lv.setOnItemClickListener(new OnItemClickListener() {
-					    @Override
-					    public void onItemClick(AdapterView<?> list, View view, int position, long id) {
-					        Log.i("Clicked!!", "onListItemClick: " + position);
-
-					        }
-
-					    }
-					);*/
 				}
 				else 
 					throw new Exception("");
 			} catch (Exception e) {
 				Log.e("Reading Stations", "Cannot execute AsyncTask: " + e.toString());
 				
-				Context context = getApplicationContext();
+				/*Context context = getApplicationContext();
 				int duration = Toast.LENGTH_LONG; // long
 				Toast toast = Toast.makeText(context, "Website seems to be down - please try again later.", duration);
-				toast.show();
+				toast.show();*/
 				
 				MainActivity2.this._locationLabel.setText("Could not look up stations. Please try again later");
 				
