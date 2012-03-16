@@ -505,6 +505,20 @@ public class StationActivity extends FragmentActivity {
 		// now open it
 		this.openURL(url.toString());
 	}
+	
+
+	/** Searches on the Android Market/Google Play store **/
+	
+	public void searchAndroidMarket(View view) {
+		// parse song first
+		StringBuilder s = new StringBuilder(
+				"market://search?q=");
+		s = convertSongInfo(s);
+
+		// open market
+		String url = s.toString();
+		startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(url)));
+	}
 
 	/** Converts the song info into a useful URL format **/
 	// TODO: Do it once and store or do it all the time?
