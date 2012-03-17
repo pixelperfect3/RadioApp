@@ -31,10 +31,16 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import android.support.v4.app.ActionBar;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.Menu;
+import android.support.v4.view.MenuItem;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -54,7 +60,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity2 extends Activity {
+public class MainActivity2 extends FragmentActivity {
 	
 	/******************
 	 * PROPERTIES
@@ -89,7 +95,6 @@ public class MainActivity2 extends Activity {
 
 		// If it's a search Intent
 		Intent intent = getIntent();
-		String city = "";
 		if (Intent.ACTION_SEARCH.equals(intent.getAction())) { // Check if it was a search Intent
 		      /*city = getIntent().getStringExtra(SearchManager.QUERY).trim();
 		      if (Character.isDigit(city.charAt(0))) {		// zipcode?
@@ -111,6 +116,13 @@ public class MainActivity2 extends Activity {
 					}
 				}*/
 		}
+		
+		// Action Bar! (From ActionBarSherlock)
+		final ActionBar ab = getSupportActionBar();
+		ab.setTitle("On The Radio");
+		ab.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD); // standard navigation
+		// background
+		ab.setBackgroundDrawable(new ColorDrawable(android.R.color.primary_text_dark));//getResources().getDrawable(R.drawable.ad_action_bar_gradient_bak));
 		
 		
 		// Retrieve widgets
@@ -172,6 +184,40 @@ public class MainActivity2 extends Activity {
 		super.onDestroy();
 	}
 	
+	// TODO: Implement search - start looking at location
+	@Override
+	public boolean onSearchRequested() {
+		_dataSource.close();
+		return super.onSearchRequested();
+	}
+	
+	/************************
+	 * ACTION BAR METHODS
+	 ***********************/
+	
+	/** Action Bar items (loaded as menu items) **/
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.layout.main_header, menu);
+		
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	/** Selecting Action Bar items **/
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.ab_location:		// look up location
+				updateLocation();
+				return true;
+			case R.id.ab_search:		// perform a new search
+				this.onSearchRequested();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
+	}
+	
 	/**********************************
 	 * METHODS FOR HANDLING FAVORITE STATIONS
 	 *********************************/
@@ -194,9 +240,6 @@ public class MainActivity2 extends Activity {
 	
 	/** removes from the favorites list **/
 	public void removeFavorite(Favorite favorite) {
-		// TODO: Check why this is not working
-		// adapter.remove(favorite);
-		
 		this.updateFavorites();
 		
 		this.showToast("Unfavorited " + favorite.getName(), true);
@@ -236,27 +279,19 @@ public class MainActivity2 extends Activity {
 	
 	/** Updates the location and then reads the stations for that location **/
 	public void updateLocation() {
-		/** Setup the ListView by populating it with the list of radio stations **/
-		AsyncTask<String, Void, String> readLocationTask = new ReadLocationTask(
-				this).execute();
 		
+		new ReadLocationTask(this).execute();	
 	}
 	
 	/***
 	 * AsyncTask class for reading the location
 	 */
 	private class ReadLocationTask extends AsyncTask<String, Void, String> {
-		// The dialog bar to show indeterminate progress
-		private ProgressDialog dialog;
 		private Context theContext;
 
 		// constructor
 		public ReadLocationTask(Activity activity) {
 			theContext = activity;
-			
-			//CityActivity.this.setProgressBarIndeterminateVisibility(true);
-			// start the progress dialog
-			//dialog = new ProgressDialog(theContext);
 		}
 
 		@Override
@@ -319,17 +354,14 @@ public class MainActivity2 extends Activity {
 			// check location result
 			if (result == null) {
 				MainActivity2.this._locationLabel.setText("Can't look up location. Please try again later.");
+				
 				// hide the progress bar
 				MainActivity2.this._progressBar.setVisibility(View.INVISIBLE);
 			}
 			else { // start looking up stations 
-				MainActivity2.this._locationLabel.setText("Looking up stations in " + result);
 				
-				
-				// TODO: Start activity
 				/** Setup the ListView by populating it with the list of radio stations **/
-				AsyncTask<String, Void, String[]> readStationsTask = new ReadStationsTask(
-						theContext, result).execute();
+				new ReadStationsTask(result).execute(); // AsyncTask<String, Void, String[]> readStationsTask = 
 			}
 		}
 
@@ -337,16 +369,6 @@ public class MainActivity2 extends Activity {
 		protected void onProgressUpdate(Void... values) {
 			// Things to be done while execution of long running operation is in
 			// progress. For example updating ProgessDialog
-		}
-		
-		/** Helper method for showing a Toast notification **/
-		private void showToast(CharSequence text, boolean timeShort) {
-			int duration = timeShort ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG; // long
-																				// or
-																				// short?
-
-			Toast toast = Toast.makeText(theContext, text, duration);
-			toast.show();
 		}
 	}
 	
@@ -357,12 +379,10 @@ public class MainActivity2 extends Activity {
 	 * AsyncTask class for reading all the stations
 	 */
 	private class ReadStationsTask extends AsyncTask<String, Void, String[]> {
-		private Context theContext;
 		String _location;
 		
 		// constructor
-		public ReadStationsTask(Context context, String _location) {
-			theContext = context;
+		public ReadStationsTask(String _location) {
 			this._location = _location;
 		}
 
@@ -408,7 +428,7 @@ public class MainActivity2 extends Activity {
 				return stations;
 
 			} catch (Exception e) {
-				Log.e(CityActivity.class.getName(),
+				Log.e(MainActivity2.class.getName(),
 						"JSON Exception: " + e.toString());
 				
 				return null;
@@ -454,7 +474,7 @@ public class MainActivity2 extends Activity {
 
 		@Override
 		protected void onPreExecute() {
-			
+			MainActivity2.this._locationLabel.setText("Looking up stations in " + _location);
 		}
 
 		@Override
@@ -519,11 +539,11 @@ public class MainActivity2 extends Activity {
 					builder.append(line);
 				}
 	
-				Log.e(CityActivity.class.toString(),
+				Log.e(MainActivity2.class.toString(),
 						"RESPONSE BUILT: " + builder.toString());
 	
 			} else {
-				Log.e(CityActivity.class.toString(), "Failed to download file");
+				Log.e(MainActivity2.class.toString(), "Failed to download file");
 				//showToast("Website seems to be down - please try again later.", false);
 				//finish();
 				return null;

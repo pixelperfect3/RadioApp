@@ -108,6 +108,7 @@ public class StationActivity extends FragmentActivity {
 		String[] split = this._stationName.split(" ");
 		_selectedChannelName = split[0];
 		_stationName = split[0] + " " + split[1];
+		
 		// Action Bar! (From ActionBarSherlock)
 		final ActionBar ab = getSupportActionBar();
 		ab.setTitle(_stationName);
