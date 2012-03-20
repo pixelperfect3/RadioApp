@@ -31,13 +31,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import android.support.v4.app.ActionBar;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.Menu;
-import android.support.v4.view.MenuItem;
-
 import android.app.Activity;
-import android.app.ProgressDialog;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
@@ -49,6 +44,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActionBar;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.Menu;
+import android.support.v4.view.MenuItem;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -189,6 +188,14 @@ public class MainActivity2 extends FragmentActivity {
 	public boolean onSearchRequested() {
 		_dataSource.close();
 		return super.onSearchRequested();
+	}
+	
+	// Receiving Intent from another activity
+	protected void onNewIntent(Intent intent) {
+		String city = intent.getStringExtra(SearchManager.QUERY).trim();
+		
+		// look up the stations
+		new ReadStationsTask(city).execute(); 
 	}
 	
 	/************************
@@ -467,7 +474,7 @@ public class MainActivity2 extends FragmentActivity {
 				Toast toast = Toast.makeText(context, "Website seems to be down - please try again later.", duration);
 				toast.show();*/
 				
-				MainActivity2.this._locationLabel.setText("Could not look up stations. Please try again later");
+				MainActivity2.this._locationLabel.setText("Could not look up stations in " + _location + ". Please try again later");
 				
 			}
 		}
