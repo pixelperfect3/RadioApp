@@ -157,11 +157,11 @@ public class MainActivity extends Activity {
 		List<Favorite> values = _dataSource.getAllFavorites();
 
 		// Populate the ListView
-		adapter = new FavoritesArrayAdapter(
+		/*adapter = new FavoritesArrayAdapter(
 				MainActivity.this,
 				values);
 		
-		_favoritesLV.setAdapter(adapter);
+		_favoritesLV.setAdapter(adapter);*/
 		
 		// now set the listview to listen for changes
 		_favoritesLV.setOnItemClickListener(new MyOnItemClickListener());

@@ -428,7 +428,7 @@ public class CityActivity extends FragmentActivity {
 					Log.v("SELECTED CHANNEL:", CityActivity.this._selectedChannelName);
 					
 					// Populate the ListView
-					ListView lv = (ListView) findViewById(R.id._stationsList);
+					/*ListView lv = (ListView) findViewById(R.id._stationsList);
 					CustomArrayAdapter cadapter = new CustomArrayAdapter( 
 							CityActivity.this,
 							stations);
